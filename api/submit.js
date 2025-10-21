@@ -252,11 +252,10 @@ export const handler = async (event, context) => {
       // Se temos um shared drive, usar ele; caso contrário, usar pasta normal
       if (sharedDriveId) {
         console.log('Usando shared drive:', sharedDriveId);
-        // Para shared drives, definir o drive pai
-        fileMetadata.driveId = sharedDriveId;
+        // Para shared drives, apenas definir a pasta se especificada
         if (driveFolderId) {
           fileMetadata.parents = [driveFolderId];
-          console.log('Com pasta específica:', driveFolderId);
+          console.log('Com pasta específica no shared drive:', driveFolderId);
         }
       } else if (driveFolderId) {
         console.log('Usando pasta normal:', driveFolderId);
@@ -279,9 +278,11 @@ export const handler = async (event, context) => {
         supportsAllDrives: true
       };
 
-      // Se estamos usando shared drive, adicionar parâmetro específico
+      // Se estamos usando shared drive, adicionar parâmetros específicos
       if (sharedDriveId) {
         createParams.supportsTeamDrives = true;
+        createParams.driveId = sharedDriveId;
+        console.log('Configurando upload para shared drive:', sharedDriveId);
       }
       
       const file = await drive.files.create(createParams);
@@ -298,6 +299,7 @@ export const handler = async (event, context) => {
 
       if (sharedDriveId) {
         permissionParams.supportsTeamDrives = true;
+        permissionParams.driveId = sharedDriveId;
       }
       
       // Tornar o arquivo acessível com o link
