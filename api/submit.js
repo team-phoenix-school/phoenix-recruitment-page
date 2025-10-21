@@ -202,21 +202,19 @@ export default async function handler(req, res) {
       console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Extensão:', extensao);
       
-      // Preparar dados para upload (usar o curriculo que já vem como data URI do frontend)
-      const uploadData = {
-        file: curriculo, // Data URI completo do frontend
-        upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos'
-        // Não incluir public_id nem folder - deixar o preset controlar
-      };
+      // Usar URLSearchParams para simular form-data
+      const formData = new URLSearchParams();
+      formData.append('file', curriculo);
+      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
       
       console.log('Enviando para Cloudinary...');
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify(uploadData)
+        body: formData
       });
       
       const responseText = await uploadResponse.text();
