@@ -196,8 +196,8 @@ export default async function handler(req, res) {
       console.log('Fazendo upload:', nomeArquivo);
       console.log('Arquivo original:', curriculoNome);
       
-      // Upload para Cloudinary como raw (para documentos)
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
+      // Upload para Cloudinary como auto (detecta tipo automaticamente)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`;
       
       console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Extensão:', extensao);
