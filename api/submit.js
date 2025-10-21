@@ -29,7 +29,7 @@ function getMimeType(filename) {
   return mimeTypes[ext] || 'application/octet-stream';
 }
 
-export default async function handler(event, context) {
+export const handler = async (event, context) => {
   // Configurar CORS de forma mais restritiva
   const allowedOrigins = [
     'https://recrutamento-phoenix.netlify.app',
@@ -326,4 +326,4 @@ export default async function handler(event, context) {
       })
     };
   }
-}
+};
