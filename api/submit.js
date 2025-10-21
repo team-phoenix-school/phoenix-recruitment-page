@@ -250,21 +250,21 @@ export const handler = async (event, context) => {
       // Remover prefixo data:... do base64 se existir
       const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
       
-      // Converter base64 para buffer
-      const buffer = Buffer.from(base64Data, 'base64');
+      console.log('Tamanho do base64:', base64Data.length);
+      console.log('Arquivo original:', curriculoNome);
       
-      // Criar um Blob com o tipo MIME correto
+      // Para Node.js, usar diretamente o base64 com data URI
       const mimeType = getMimeType(curriculoNome);
-      const blob = new Blob([buffer], { type: mimeType });
+      const dataUri = `data:${mimeType};base64,${base64Data}`;
       
       console.log('MIME type detectado:', mimeType);
-      console.log('Tamanho do buffer:', buffer.length);
       
       const formData = new FormData();
-      formData.append('file', blob, curriculoNome); // Usar blob com nome original
+      formData.append('file', dataUri); // Usar data URI completo
       formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
       formData.append('public_id', nomeUnico);
       formData.append('resource_type', 'raw'); // Para documentos PDF/DOC
+      formData.append('original_filename', curriculoNome); // Nome original com extensão
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
