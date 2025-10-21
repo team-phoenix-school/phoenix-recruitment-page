@@ -244,14 +244,19 @@ export const handler = async (event, context) => {
 
       // Se temos um shared drive, usar ele; caso contrário, usar pasta normal
       if (sharedDriveId) {
+        console.log('Usando shared drive:', sharedDriveId);
         // Para shared drives, definir o drive pai
         fileMetadata.driveId = sharedDriveId;
         if (driveFolderId) {
           fileMetadata.parents = [driveFolderId];
+          console.log('Com pasta específica:', driveFolderId);
         }
       } else if (driveFolderId) {
+        console.log('Usando pasta normal:', driveFolderId);
         // Para pastas normais
         fileMetadata.parents = [driveFolderId];
+      } else {
+        console.log('Nenhum local de armazenamento específico configurado');
       }
       
       const media = {
@@ -295,6 +300,13 @@ export const handler = async (event, context) => {
       
     } catch (uploadError) {
       console.error('Erro ao fazer upload do currículo:', uploadError);
+      console.error('Detalhes do erro:', {
+        message: uploadError.message,
+        code: uploadError.code,
+        status: uploadError.response?.status,
+        statusText: uploadError.response?.statusText,
+        data: uploadError.response?.data
+      });
       throw new Error('Falha ao salvar o currículo');
     }
 
