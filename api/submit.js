@@ -202,10 +202,19 @@ export default async function handler(req, res) {
       console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Extensão:', extensao);
       
+      // Debug das variáveis
+      console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
+      console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
+      console.log('URL do Cloudinary:', cloudinaryUrl);
+      
       // Usar URLSearchParams para simular form-data
       const formData = new URLSearchParams();
       formData.append('file', curriculo);
       formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
+      
+      console.log('Dados sendo enviados:');
+      console.log('- upload_preset:', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
+      console.log('- file size:', curriculo.length);
       
       console.log('Enviando para Cloudinary...');
       
