@@ -236,22 +236,35 @@ export const handler = async (event, context) => {
         throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
       }
       
-      // Criar nome único para o arquivo mantendo a extensão
+      // Criar nome único para o arquivo SEM extensão (Cloudinary detecta automaticamente)
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      const extensao = curriculoNome.split('.').pop().toLowerCase();
-      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}.${extensao}`;
+      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}`;
       
       console.log('Fazendo upload:', nomeUnico);
+      console.log('Arquivo original:', curriculoNome);
       
-      // Upload para Cloudinary (como auto para detectar tipo automaticamente)
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`;
+      // Upload para Cloudinary como raw (para documentos)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
+      
+      // Remover prefixo data:... do base64 se existir
+      const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
+      
+      // Converter base64 para buffer
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      // Criar um Blob com o tipo MIME correto
+      const mimeType = getMimeType(curriculoNome);
+      const blob = new Blob([buffer], { type: mimeType });
+      
+      console.log('MIME type detectado:', mimeType);
+      console.log('Tamanho do buffer:', buffer.length);
       
       const formData = new FormData();
-      formData.append('file', curriculo); // Base64 data
+      formData.append('file', blob, curriculoNome); // Usar blob com nome original
       formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
       formData.append('public_id', nomeUnico);
-      formData.append('resource_type', 'auto'); // Deixa o Cloudinary detectar o tipo
+      formData.append('resource_type', 'raw'); // Para documentos PDF/DOC
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
