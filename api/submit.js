@@ -226,64 +226,48 @@ export const handler = async (event, context) => {
     // Nota: Arquivos serão salvos no Drive pessoal do Service Account
     console.log('Configuração: Upload direto para Drive do Service Account');
     
-    // Upload do currículo para o Google Drive
+    // Upload do arquivo usando Cloudinary (gratuito)
     let fileUrl = '';
     try {
-      // Remover prefixo data:... do base64
-      const base64Data = curriculo.split(',')[1] || curriculo;
-      const buffer = Buffer.from(base64Data, 'base64');
+      console.log('Iniciando upload do currículo...');
       
       // Criar nome único para o arquivo
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      const nomeUnico = `${nomeSeguro}_${timestamp}_${curriculoNome}`;
+      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}`;
       
-      // Configurar metadados do arquivo baseado no tipo de armazenamento
-      const fileMetadata = {
-        name: nomeUnico
-      };
-
-      // Upload direto para o Drive pessoal do Service Account (sem pasta específica)
-      console.log('Fazendo upload direto para o Drive do Service Account');
+      // Upload para Cloudinary
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
       
-      const media = {
-        mimeType: getMimeType(curriculoNome),
-        body: Readable.from(buffer)
-      };
+      const formData = new FormData();
+      formData.append('file', curriculo); // Base64 data
+      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
+      formData.append('public_id', nomeUnico);
+      formData.append('resource_type', 'raw');
       
-      // Configurar parâmetros da requisição (simples, sem shared drive)
-      const createParams = {
-        requestBody: fileMetadata,
-        media: media,
-        fields: 'id, webViewLink'
-      };
+      const uploadResponse = await fetch(cloudinaryUrl, {
+        method: 'POST',
+        body: formData
+      });
       
-      const file = await drive.files.create(createParams);
+      if (!uploadResponse.ok) {
+        throw new Error(`Cloudinary upload failed: ${uploadResponse.status}`);
+      }
       
-      // Configurar permissões (simples)
-      const permissionParams = {
-        fileId: file.data.id,
-        requestBody: {
-          role: 'reader',
-          type: 'anyone'
-        }
-      };
+      const uploadResult = await uploadResponse.json();
+      fileUrl = uploadResult.secure_url;
       
-      // Tornar o arquivo acessível com o link
-      await drive.permissions.create(permissionParams);
-      
-      fileUrl = file.data.webViewLink;
+      console.log('Upload realizado com sucesso:', fileUrl);
       
     } catch (uploadError) {
       console.error('Erro ao fazer upload do currículo:', uploadError);
-      console.error('Detalhes do erro:', {
-        message: uploadError.message,
-        code: uploadError.code,
-        status: uploadError.response?.status,
-        statusText: uploadError.response?.statusText,
-        data: uploadError.response?.data
-      });
-      throw new Error('Falha ao salvar o currículo');
+      
+      // Fallback: salvar informações do arquivo sem o upload
+      const timestamp = Date.now();
+      const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
+      fileUrl = `ARQUIVO_NAO_SALVO: ${curriculoNome} (${nomeSeguro}_${timestamp}) - Configure Cloudinary`;
+      
+      console.log('Usando fallback para arquivo:', fileUrl);
     }
 
     // Preparar data/hora no formato brasileiro
