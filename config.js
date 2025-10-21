@@ -29,7 +29,7 @@ window.PhoenixConfig = {
     apiEndpoint: '/api/submit',
     
     // Campos obrigatórios
-    requiredFields: ['nome', 'email', 'telefone', 'idade', 'cargo', 'aceita'],
+    requiredFields: ['nome', 'email', 'telefone', 'idade', 'curriculo', 'aceita'],
     
     // Opções de cargo
     cargoOptions: [

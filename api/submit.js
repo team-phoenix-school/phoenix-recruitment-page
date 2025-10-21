@@ -9,12 +9,23 @@ function sanitizeInput(input) {
     .substring(0, 1000); // Limita tamanho
 }
 
-// Função para validar tamanho do payload
+// Função para validar tamanho do payload (aumentado para suportar arquivos)
 function validatePayloadSize(data) {
   const jsonString = JSON.stringify(data);
   const sizeInBytes = new Blob([jsonString]).size;
-  const maxSize = 50 * 1024; // 50KB
+  const maxSize = 10 * 1024 * 1024; // 10MB (para suportar arquivos base64)
   return sizeInBytes <= maxSize;
+}
+
+// Função para obter MIME type do arquivo
+function getMimeType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const mimeTypes = {
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
 }
 
 export default async function handler(req, res) {
@@ -61,21 +72,27 @@ export default async function handler(req, res) {
   }
 
   // Extrair e sanitizar dados
-  let { nome, email, telefone, idade, cargo, experiencia, motivacao } = req.body;
+  let { nome, email, telefone, idade, curriculo, curriculoNome } = req.body;
   
   nome = sanitizeInput(nome);
   email = sanitizeInput(email);
   telefone = sanitizeInput(telefone);
   idade = sanitizeInput(idade);
-  cargo = sanitizeInput(cargo);
-  experiencia = sanitizeInput(experiencia || '');
-  motivacao = sanitizeInput(motivacao || '');
+  curriculoNome = sanitizeInput(curriculoNome || '');
 
   // Validar campos obrigatórios
-  if (!nome || !email || !telefone || !idade || !cargo) {
+  if (!nome || !email || !telefone || !idade || !curriculo) {
     return res.status(400).json({ 
       error: 'Campos obrigatórios faltando',
-      details: 'Nome, email, telefone, idade e cargo são obrigatórios'
+      details: 'Nome, email, telefone, idade e currículo são obrigatórios'
+    });
+  }
+  
+  // Validar formato do arquivo
+  if (!curriculoNome || !curriculoNome.match(/\.(pdf|doc|docx)$/i)) {
+    return res.status(400).json({ 
+      error: 'Arquivo inválido',
+      details: 'O currículo deve ser um arquivo PDF, DOC ou DOCX'
     });
   }
   
@@ -118,19 +135,69 @@ export default async function handler(req, res) {
     // Autenticação com Google Service Account (segura)
     const auth = new google.auth.GoogleAuth({
       credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive.file'
+      ],
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
+    const drive = google.drive({ version: 'v3', auth });
     const sheetId = process.env.SHEET_ID;
+    const driveFolderId = process.env.DRIVE_FOLDER_ID;
 
     // Verificar se as variáveis de ambiente estão configuradas
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID) {
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID || !process.env.DRIVE_FOLDER_ID) {
       console.error('Variáveis de ambiente não configuradas');
       return res.status(500).json({ 
         error: 'Erro de configuração do servidor',
         details: 'As credenciais do Google não estão configuradas'
       });
+    }
+    
+    // Upload do currículo para o Google Drive
+    let fileUrl = '';
+    try {
+      // Remover prefixo data:... do base64
+      const base64Data = curriculo.split(',')[1] || curriculo;
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      // Criar nome único para o arquivo
+      const timestamp = Date.now();
+      const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
+      const nomeUnico = `${nomeSeguro}_${timestamp}_${curriculoNome}`;
+      
+      // Upload para o Drive
+      const fileMetadata = {
+        name: nomeUnico,
+        parents: [driveFolderId]
+      };
+      
+      const media = {
+        mimeType: getMimeType(curriculoNome),
+        body: require('stream').Readable.from(buffer)
+      };
+      
+      const file = await drive.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: 'id, webViewLink'
+      });
+      
+      // Tornar o arquivo acessível com o link
+      await drive.permissions.create({
+        fileId: file.data.id,
+        requestBody: {
+          role: 'reader',
+          type: 'anyone'
+        }
+      });
+      
+      fileUrl = file.data.webViewLink;
+      
+    } catch (uploadError) {
+      console.error('Erro ao fazer upload do currículo:', uploadError);
+      throw new Error('Falha ao salvar o currículo');
     }
 
     // Preparar data/hora no formato brasileiro
@@ -152,16 +219,13 @@ export default async function handler(req, res) {
       email.toLowerCase(), // Normalizar email
       telefone,
       idadeNum, // Idade como número
-      cargo,
-      experiencia,
-      motivacao,
-      'Novo' // Status inicial
+      fileUrl // Link do currículo no Drive
     ]];
 
     // Inserir dados na planilha
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: 'Candidatos!A2:I', // 9 colunas: Data, Nome, Email, Telefone, Idade, Cargo, Experiência, Motivação, Status
+      range: 'Candidatos!A2:F', // 6 colunas: Data, Nome, Email, Telefone, Idade, Link do Currículo
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values,
@@ -176,7 +240,7 @@ export default async function handler(req, res) {
 
     // Log de sucesso (sem dados sensíveis)
     if (process.env.NODE_ENV === 'development') {
-      console.log('Candidatura registrada com sucesso:', { cargo, timestamp: dataCadastro });
+      console.log('Candidatura registrada com sucesso:', { timestamp: dataCadastro });
     }
 
     // Resposta de sucesso

@@ -119,12 +119,18 @@ if (form) {
     const email = document.getElementById('email').value.trim();
     const telefone = document.getElementById('telefone').value.trim();
     const idade = document.getElementById('idade').value.trim();
-    const cargo = document.getElementById('cargo').value;
+    const curriculo = document.getElementById('curriculo').files[0];
     const aceita = document.getElementById('aceita').checked;
     
     // Verificar campos obrigatórios
-    if (!nome || !email || !telefone || !idade || !cargo || !aceita) {
-      alert('Por favor, preencha todos os campos obrigatórios e aceite os termos.');
+    if (!nome || !email || !telefone || !idade || !curriculo || !aceita) {
+      alert('Por favor, preencha todos os campos obrigatórios, anexe seu currículo e aceite os termos.');
+      return;
+    }
+    
+    // Validar tamanho do arquivo (5MB)
+    if (curriculo.size > 5 * 1024 * 1024) {
+      alert('O arquivo do currículo deve ter no máximo 5MB.');
       return;
     }
     
@@ -160,15 +166,19 @@ if (form) {
 // Função para enviar dados para API segura
 async function enviarParaGoogleSheets() {
   try {
-    // Preparar dados
+    // Preparar dados com upload de arquivo
+    const curriculo = document.getElementById('curriculo').files[0];
+    
+    // Converter arquivo para base64
+    const curriculoBase64 = await converterArquivoParaBase64(curriculo);
+    
     const dados = {
       nome: document.getElementById('nome').value.trim(),
       email: document.getElementById('email').value.trim(),
       telefone: document.getElementById('telefone').value.trim(),
       idade: document.getElementById('idade').value.trim(),
-      cargo: document.getElementById('cargo').value,
-      experiencia: document.getElementById('experiencia')?.value.trim() || '',
-      motivacao: document.getElementById('motivacao')?.value.trim() || ''
+      curriculo: curriculoBase64,
+      curriculoNome: curriculo.name
     };
     
     // Enviar para API segura (Netlify Function)
@@ -188,6 +198,7 @@ async function enviarParaGoogleSheets() {
       
       // Limpar formulário
       document.getElementById('recruitment-form').reset();
+      document.getElementById('file-name').textContent = 'Nenhum arquivo selecionado';
       
     } else {
       // Erro retornado pela API
