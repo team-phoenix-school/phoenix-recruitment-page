@@ -200,27 +200,25 @@ export default async function handler(req, res) {
       // Upload para Cloudinary como raw (para documentos)
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
       
-      // Remover prefixo data:... do base64 se existir
-      const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
-      
-      console.log('Tamanho do base64:', base64Data.length);
+      console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Extensão:', extensao);
       
-      // Para Node.js, usar diretamente o base64 com data URI
-      const mimeType = getMimeType(curriculoNome);
-      const dataUri = `data:${mimeType};base64,${base64Data}`;
+      // Preparar dados para upload (usar o curriculo que já vem como data URI do frontend)
+      const uploadData = {
+        file: curriculo, // Data URI completo do frontend
+        upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos',
+        public_id: nomeUnico,
+        resource_type: 'raw'
+      };
       
-      console.log('MIME type detectado:', mimeType);
-      
-      const formData = new FormData();
-      formData.append('file', dataUri); // Usar data URI completo
-      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
-      formData.append('public_id', nomeUnico); // COM extensão
-      formData.append('resource_type', 'raw'); // Para documentos PDF/DOC
+      console.log('Enviando para Cloudinary...');
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(uploadData)
       });
       
       const responseText = await uploadResponse.text();
