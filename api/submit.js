@@ -196,8 +196,8 @@ export default async function handler(req, res) {
       console.log('Fazendo upload:', nomeArquivo);
       console.log('Arquivo original:', curriculoNome);
       
-      // Upload para Cloudinary como auto (detecta tipo automaticamente)
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`;
+      // Upload para Cloudinary como raw (para documentos)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
       
       console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Extensão:', extensao);
@@ -223,6 +223,9 @@ export default async function handler(req, res) {
       body += `--${boundary}${CRLF}`;
       body += `Content-Disposition: form-data; name="public_id"${CRLF}${CRLF}`;
       body += `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}` + CRLF;
+      body += `--${boundary}${CRLF}`;
+      body += `Content-Disposition: form-data; name="resource_type"${CRLF}${CRLF}`;
+      body += 'raw' + CRLF;
       body += `--${boundary}--${CRLF}`;
       
       console.log('Enviando multipart/form-data para Cloudinary...');
@@ -245,11 +248,17 @@ export default async function handler(req, res) {
       
       const uploadResult = JSON.parse(responseText);
       
-      // Usar URL direta do Cloudinary sem modificações
+      // Usar URL direta do Cloudinary para raw files
       fileUrl = uploadResult.secure_url;
       
+      // Se a URL não for raw, corrigir manualmente
+      if (fileUrl.includes('/image/upload/')) {
+        fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+      }
+      
       console.log('Upload realizado com sucesso:', fileUrl);
-      console.log('Nome do arquivo salvo:', nomeArquivo);
+      console.log('URL original:', uploadResult.secure_url);
+      console.log('Nome do arquivo:', nomeArquivo);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
