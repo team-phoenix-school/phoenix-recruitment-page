@@ -1,0 +1,480 @@
+:root {
+  --phoenix-magenta: #A70240;
+  --phoenix-black: #000000;
+  --phoenix-white: #ffffff;
+}
+
+/* Fontes */
+@font-face {
+  font-family: 'Axiforma';
+  src: url('src/fonts/Axiforma-Regular.woff2') format('woff2'),
+       url('https://raw.githubusercontent.com/phoenix-droid-art/phoenix-landing-page/refs/heads/main/src/fonts/Axiforma-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('src/fonts/Axiforma-Bold.woff2') format('woff2'),
+       url('https://raw.githubusercontent.com/phoenix-droid-art/phoenix-landing-page/refs/heads/main/src/fonts/Axiforma-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Acumin Variable Concept';
+  src: url('src/fonts/AcuminVariableConcept.woff2') format('woff2'),
+       url('https://raw.githubusercontent.com/phoenix-droid-art/phoenix-landing-page/refs/heads/main/src/fonts/AcuminVariableConcept.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Utilitários de fonte */
+.font-axiforma {
+  font-family: 'Axiforma', serif !important;
+}
+
+/* Títulos */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Axiforma', Arial, sans-serif !important;
+  font-weight: bold;
+}
+
+/* Corpo */
+body {
+  font-family: 'Acumin Variable Concept', Arial, sans-serif;
+  background-color: var(--phoenix-black);
+  color: var(--phoenix-white);
+}
+
+/* Texto comum com Acumin */
+p, span, div, li, a, label, input, textarea, select {
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+}
+
+/* Bold com Acumin */
+strong, b {
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Cores personalizadas */
+.text-phoenix-magenta {
+  color: var(--phoenix-magenta);
+}
+.bg-phoenix-magenta {
+  background-color: var(--phoenix-magenta) !important;
+}
+.phoenix-gradient {
+  background: linear-gradient(135deg, var(--phoenix-magenta) 0%, var(--phoenix-black) 100%) !important;
+}
+
+/* Hero Background */
+.hero-background {
+  position: relative;
+  background: none !important;
+}
+.hero-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://raw.githubusercontent.com/phoenix-droid-art/phoenix-landing-page/refs/heads/main/src/assets/Background-2.webp");
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(80%) brightness(0.5);
+  z-index: 0;
+}
+.hero-background > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animações */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95);}
+  to { opacity: 1; transform: scale(1);}
+}
+.animate-fade-in {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+/* Hover effects */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Formulário de inscrição */
+.form-container {
+  background-color: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
+  transition: all 0.3s ease-in-out;
+}
+
+.form-container h2 {
+  font-size: 28px;
+  font-family: 'Axiforma', sans-serif !important;
+  margin-bottom: 20px;
+  color: var(--phoenix-magenta);
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--phoenix-white);
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #1a1a1a;
+  background-color: #000000;
+  color: #f5f5f5;
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* Remover setas do input number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--phoenix-magenta);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #cbd5e1;
+}
+
+select option {
+  background-color: #000000;
+  color: #f5f5f5;
+}
+
+/* Upload de arquivo */
+.file-upload-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--phoenix-magenta) 0%, var(--phoenix-black) 100%);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.file-label:hover {
+  transform: scale(1.02);
+}
+
+.file-name {
+  display: block;
+  color: #cbd5e1;
+  font-size: 14px;
+  margin-top: 8px;
+  font-family: 'Acumin Variable Concept', Arial, sans-serif !important;
+}
+
+/* Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.checkbox-container input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.checkbox-container label {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 400;
+  color: var(--phoenix-white);
+}
+
+/* Botão submit */
+button[type="submit"] {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(167, 2, 64, 0.3);
+}
+
+/* Etapas do formulário */
+.etapa { 
+  display: none; 
+}
+.etapa.ativa { 
+  display: block; 
+}
+
+/* Loading animation */
+.loading-animation {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #000000;
+  border-top: 5px solid var(--phoenix-magenta);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+#loading {
+  text-align: center;
+  padding: 40px 0;
+}
+
+#loading p {
+  font-size: 18px;
+  color: var(--phoenix-white);
+}
+
+/* Confirmação */
+.checkmark-animation {
+  font-size: 64px;
+  color: var(--phoenix-magenta);
+  animation: pop 0.6s ease-out forwards;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0;}
+  100% { transform: scale(1); opacity: 1;}
+}
+
+#confirmacao {
+  text-align: center;
+  padding: 40px 0;
+}
+
+#confirmacao h2 {
+  color: var(--phoenix-magenta);
+  margin-bottom: 20px;
+}
+
+#confirmacao p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  color: var(--phoenix-white);
+}
+
+/* Seções */
+section {
+  scroll-margin-top: 100px;
+  background-color: #000000 !important;
+}
+
+/* Garantir fundo preto em todos os elementos */
+.bg-phoenix-light,
+.bg-gray-900,
+.bg-gray-800,
+.bg-gray-700 {
+  background-color: #000000 !important;
+}
+
+/* Cards com fundo ligeiramente diferente para contraste */
+.bg-phoenix-dark {
+  background-color: #0a0a0a !important;
+  border: 1px solid #1a1a1a;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 30px 20px;
+    border-radius: 16px;
+  }
+  
+  .form-container h2 {
+    font-size: 24px;
+  }
+  
+  h1 {
+    font-size: 2.5rem !important;
+  }
+  
+  h2 {
+    font-size: 2rem !important;
+  }
+  
+  .hero-background {
+    padding-top: 120px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  button[type="submit"] {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transições gerais */
+a, button {
+  transition: all 0.3s ease;
+}
+
+/* Links hover */
+a:hover {
+  color: var(--phoenix-magenta);
+}
+
+/* Ícones das redes sociais mantêm cor branca no hover */
+a.bg-phoenix-magenta:hover {
+  color: white !important;
+}
+
+a.bg-phoenix-magenta:hover i {
+  color: white !important;
+}
+
+/* Sombras */
+.shadow-lg {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Efeito hover para cards */
+.hover-scale:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Bordas */
+.border-phoenix-gray {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Efeitos visuais adicionais */
+/* Gradiente sutil nas seções */
+section:nth-child(even) {
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 50%, #000000 100%) !important;
+}
+
+/* Header transparente */
+header {
+  background: transparent !important;
+}
+
+/* Botões sem efeito glow, apenas zoom */
+.phoenix-gradient:hover {
+  transform: scale(1.05);
+  box-shadow: none;
+}
+
+/* Ícones com animação */
+.fas, .fab {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover .fas,
+.hover-scale:hover .fab {
+  transform: scale(1.1);
+}
+
+/* Separadores com gradiente */
+.w-20.h-1.bg-phoenix-magenta {
+  background: linear-gradient(90deg, transparent 0%, var(--phoenix-magenta) 50%, transparent 100%) !important;
+}
+
+/* Footer com gradiente superior */
+footer {
+  background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%) !important;
+}
+
+/* Texto sem efeito glow */
+h1, h2 {
+  text-shadow: none;
+}
+
+/* Animação de entrada para elementos */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.8s ease-out;
+}

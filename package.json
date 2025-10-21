@@ -1,0 +1,40 @@
+{
+  "name": "phoenix-recruitment-landing",
+  "version": "1.0.0",
+  "description": "Landing page para processo seletivo da Phoenix English School",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 3000",
+    "build": "echo 'Build completed - static files ready'",
+    "deploy": "echo 'Deploy to Netlify via Git push'",
+    "test": "echo 'Testing landing page functionality'"
+  },
+  "keywords": [
+    "phoenix",
+    "english",
+    "school",
+    "recruitment",
+    "landing-page",
+    "netlify"
+  ],
+  "author": "Phoenix English School",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenix-english-school/recruitment-landing"
+  },
+  "homepage": "https://phoenix-recruitment.netlify.app",
+  "devDependencies": {},
+  "dependencies": {
+    "googleapis": "^118.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

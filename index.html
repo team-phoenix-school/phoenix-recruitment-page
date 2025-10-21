@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="src/assets/logo-ico.png" type="image/png">
+  <title>Phoenix - Processo Seletivo Agente Comercial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'phoenix-magenta': '#A70240',
+            'phoenix-dark': '#000000',
+            'phoenix-black': '#000000',
+            'phoenix-light': '#111111',
+            'phoenix-gray': '#333333',
+            'phoenix-text': '#ffffff'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-black font-sans text-gray-100">
+  <!-- Hero Section -->
+  <section class="hero-background bg-phoenix-dark text-white pt-8 pb-16 min-h-screen flex items-center">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center">
+        <img src="src/assets/logo-branca.png" alt="Logo Phoenix" class="h-10 md:h-12 mx-auto mb-8">
+        <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-8 drop-shadow-lg">
+          Processo Seletivo
+          <span class="bg-phoenix-magenta text-white px-4 py-2 rounded-lg inline-block mt-4 font-axiforma">Phoenix</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-white mb-12 leading-relaxed">
+          Procuramos <strong>jovens e adultos</strong> <strong>comunicativos e ambiciosos</strong> para atuar na <strong>prospecção de alunos</strong> e desenvolvimento de <strong>estratégias comerciais</strong>. 
+          Se você tem <strong>mentalidade empreendedora</strong> e <strong>foco em resultados</strong>, esta é sua oportunidade!
+        </p>
+        <div class="flex justify-center">
+          <a href="#formulario" class="inline-block text-lg md:text-xl px-8 py-4 text-white font-axiforma font-bold rounded-full phoenix-gradient transition duration-300 hover:scale-105">
+            Candidate-se Agora
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre o Processo -->
+  <section class="py-16 bg-black text-white">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center animate-slide-up">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8">
+          Agente <span class="text-phoenix-magenta font-axiforma">Comercial</span>
+        </h2>
+        <div class="w-20 h-1 bg-phoenix-magenta mx-auto mb-8"></div>  
+        <div class="grid md:grid-cols-3 gap-8 mt-12">
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Treinamento Avançado</h3>
+            <p class="text-gray-300">
+              Receba treinamento comercial avançado e formação executiva completa.
+            </p>
+          </div>
+          
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-rocket"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Plano de Carreira</h3>
+            <p class="text-gray-300">
+              Desenvolva sua carreira com plano estruturado e regime CLT.
+            </p>
+          </div>
+          
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Remuneração Atrativa</h3>
+            <p class="text-gray-300">
+              Remuneração variável acima do mercado com foco em metas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Principais Funções -->
+  <section class="py-16 bg-black">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">
+          Principais <span class="text-phoenix-magenta font-axiforma">Funções</span>
+        </h2>
+        <div class="w-20 h-1 bg-phoenix-magenta mx-auto mb-12"></div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Prospecção</h3>
+            <p class="text-gray-300">
+              Captação e prospecção ativa de novos alunos para a escola
+            </p>
+          </div>
+          
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Estratégias</h3>
+            <p class="text-gray-300">
+              Desenvolvimento e execução de estratégias comerciais eficazes
+            </p>
+          </div>
+          
+          <div class="bg-phoenix-dark p-6 rounded-lg shadow-lg hover-scale text-center">
+            <div class="text-4xl text-phoenix-magenta mb-4">
+              <i class="fas fa-handshake"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-3">Atendimento</h3>
+            <p class="text-gray-300">
+              Trabalho interno e externo com foco no relacionamento com clientes
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pré-requisitos e Ofertas -->
+  <section class="py-16 bg-black">
+    <div class="container mx-auto px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12">
+          <!-- Pré-requisitos -->
+          <div class="bg-phoenix-dark p-8 rounded-lg shadow-lg">
+            <h3 class="text-2xl font-bold mb-6 text-phoenix-magenta flex items-center">
+              <i class="fas fa-clipboard-check mr-3"></i>
+              Pré-requisitos
+            </h3>
+            <ul class="space-y-4">
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Boa capacidade na comunicação</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Mentalidade empreendedora</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Capacidade de concentração e foco</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Habilidade de trabalhar sob pressão</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Foco no cumprimento de metas</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Disponibilidade de tempo</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-check-circle text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Espírito de equipe e liderança</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- O que oferecemos -->
+          <div class="bg-phoenix-dark p-8 rounded-lg shadow-lg">
+            <h3 class="text-2xl font-bold mb-6 text-phoenix-magenta flex items-center">
+              <i class="fas fa-gift mr-3"></i>
+              O que Oferecemos
+            </h3>
+            <ul class="space-y-4">
+              <li class="flex items-start">
+                <i class="fas fa-star text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Treinamento comercial avançado</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-star text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Formação executiva</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-star text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Plano de carreira estruturado</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-star text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Regime CLT</span>
+              </li>
+              <li class="flex items-start">
+                <i class="fas fa-star text-phoenix-magenta mr-3 mt-1"></i>
+                <span>Remuneração variável acima do mercado</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulário de Inscrição -->
+  <section id="formulario" class="py-16 bg-black">
+    <div class="container mx-auto px-6">
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-12 animate-slide-up">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            <span class="text-phoenix-magenta font-axiforma">Inscreva-se</span>
+          </h2>
+          <div class="w-20 h-1 bg-phoenix-magenta mx-auto mb-6"></div>
+          <p class="text-lg text-gray-300">
+            Preencha o formulário abaixo e dê o primeiro passo para se tornar um Agente Comercial Phoenix.
+          </p>
+        </div>
+        
+        <div class="form-container">
+          <div id="conteudo-formulario">
+            <!-- Formulário -->
+            <div id="formulario-section" class="etapa ativa">
+              <form id="recruitment-form" name="recruitment-form" method="POST" data-netlify="true">
+                <input type="hidden" name="form-name" value="recruitment-form" />
+                
+                <div class="input-group">
+                  <label for="nome">Nome Completo *</label>
+                  <input type="text" id="nome" name="nome" placeholder="Ex: João Silva" required />
+                </div>
+                
+                <div class="input-group">
+                  <label for="email">E-mail *</label>
+                  <input type="email" id="email" name="email" placeholder="Ex: joao@email.com" required />
+                </div>
+                
+                <div class="input-group">
+                  <label for="telefone">Telefone *</label>
+                  <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" required />
+                </div>
+                
+                <div class="input-group">
+                  <label for="idade">Idade *</label>
+                  <input type="number" id="idade" name="idade" placeholder="Ex: 25" min="16" max="99" required />
+                </div>
+                
+                <div class="input-group">
+                  <label for="curriculo">Currículo (PDF, DOC ou DOCX) *</label>
+                  <div class="file-upload-wrapper">
+                    <input type="file" id="curriculo" name="curriculo" accept=".pdf,.doc,.docx" required class="file-input" />
+                    <label for="curriculo" class="file-label">
+                      <i class="fas fa-cloud-upload-alt mr-2"></i>
+                      <span class="file-label-text">Escolher arquivo</span>
+                    </label>
+                    <span class="file-name" id="file-name">Nenhum arquivo selecionado</span>
+                  </div>
+                  <p class="text-sm text-gray-400 mt-2">Tamanho máximo: 5MB</p>
+                </div>
+                
+                <div class="checkbox-container">
+                  <input type="checkbox" id="aceita" name="aceita" required />
+                  <label for="aceita">Aceito receber comunicações sobre o processo seletivo.</label>
+                </div>
+                
+                <div class="text-center mt-4">
+                  <button style="padding: 12px 16px; font-size: 16px;" class="text-white font-axiforma font-bold rounded-full phoenix-gradient transition duration-300 hover:scale-105" type="submit">
+                    Enviar Candidatura
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="etapa">
+              <div class="loading-animation" role="status"></div>
+              <p>Enviando sua candidatura...</p>
+            </div>
+
+            <!-- Confirmação -->
+            <div id="confirmacao" class="etapa">
+              <div class="checkmark-animation">&#10003;</div>
+              <h2 class="font-axiforma font-bold text-2xl md:text-3xl mb-4 text-phoenix-magenta w-full text-center">
+                Candidatura Enviada com Sucesso!
+              </h2>
+              <p class="text-center mb-6">
+                Obrigado pelo seu interesse! Nossa equipe comercial analisará seu perfil e entrará em contato para as próximas etapas do processo seletivo.
+              </p>
+              <div class="text-center">
+                <a href="#contato" class="bg-phoenix-magenta px-6 py-3 rounded-full font-axiforma font-bold hover:bg-opacity-90 transition phoenix-gradient hover-scale inline-block">
+                  Ver Contatos
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contato e Redes Sociais -->
+  <section id="contato" class="py-16 bg-black">
+    <div class="container mx-auto px-6">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8">
+          Entre em <span class="text-phoenix-magenta font-axiforma">Contato</span>
+        </h2>
+        <div class="w-20 h-1 bg-phoenix-magenta mx-auto mb-12"></div>
+        
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+          <div class="flex items-center justify-center md:justify-end">
+            <div class="bg-phoenix-magenta text-white w-14 h-14 rounded-full mr-4 flex items-center justify-center">
+              <i class="fas fa-envelope text-xl"></i>
+            </div>
+            <div class="text-left">
+              <h3 class="font-bold text-lg mb-1">E-mail</h3>
+              <a href="mailto:phoenixschool10@gmail.com" class="text-gray-300 hover:text-phoenix-magenta transition">
+                phoenixschool10@gmail.com
+              </a>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-center md:justify-start">
+            <div class="bg-phoenix-magenta text-white w-14 h-14 rounded-full mr-4 flex items-center justify-center">
+              <i class="fab fa-whatsapp text-xl"></i>
+            </div>
+            <div class="text-left">
+              <h3 class="font-bold text-lg mb-1">WhatsApp</h3>
+              <a href="https://api.whatsapp.com/send/?phone=5599992066131&text=Ol%C3%A1!%20Tenho%20interesse%20na%20vaga%20de%20Agente%20Comercial%20da%20Phoenix." target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-phoenix-magenta transition">
+                (99) 99206-6131
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center">
+          <h3 class="text-xl font-bold mb-6">Siga-nos nas Redes Sociais</h3>
+          <div class="flex justify-center space-x-6">
+            <a href="https://www.instagram.com/phoenix_english_school" target="_blank" rel="noopener noreferrer" class="bg-phoenix-magenta text-white w-12 h-12 rounded-full flex items-center justify-center transition hover:scale-110">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+            <a href="https://www.tiktok.com/@phoenix.pedreiras" target="_blank" rel="noopener noreferrer" class="bg-phoenix-magenta text-white w-12 h-12 rounded-full flex items-center justify-center transition hover:scale-110">
+              <i class="fab fa-tiktok text-xl"></i>
+            </a>
+            <a href="https://www.facebook.com/phoenixenglishschool" target="_blank" rel="noopener noreferrer" class="bg-phoenix-magenta text-white w-12 h-12 rounded-full flex items-center justify-center transition hover:scale-110">
+              <i class="fab fa-facebook-f text-xl"></i>
+            </a>
+            <a href="https://www.youtube.com/@phoenixpedreiras?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="bg-phoenix-magenta text-white w-12 h-12 rounded-full flex items-center justify-center transition hover:scale-110">
+              <i class="fab fa-youtube text-xl"></i>
+            </a>
+            <a href="https://www.linkedin.com/company/phoenix-english-school" target="_blank" rel="noopener noreferrer" class="bg-phoenix-magenta text-white w-12 h-12 rounded-full flex items-center justify-center transition hover:scale-110">
+              <i class="fab fa-linkedin-in text-xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white py-8">
+    <div class="container mx-auto px-6 text-center">
+      <div class="flex justify-center mb-4">
+        <img src="src/assets/logo-branca.png" alt="Logo Phoenix" class="h-12">
+      </div>
+      <p class="text-gray-400 mb-4">
+        © 2024 Phoenix, Inglês de Verdade. Todos os direitos reservados.
+      </p>
+      <p class="text-sm text-gray-500">
+        Processo Seletivo Phoenix - Faça parte da nossa equipe!
+      </p>
+    </div>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
