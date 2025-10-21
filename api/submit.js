@@ -13,7 +13,7 @@ function sanitizeInput(input) {
 // Função para validar tamanho do payload (aumentado para suportar arquivos)
 function validatePayloadSize(data) {
   const jsonString = JSON.stringify(data);
-  const sizeInBytes = new Blob([jsonString]).size;
+  const sizeInBytes = Buffer.byteLength(jsonString, 'utf8');
   const maxSize = 10 * 1024 * 1024; // 10MB (para suportar arquivos base64)
   return sizeInBytes <= maxSize;
 }
