@@ -236,10 +236,12 @@ export const handler = async (event, context) => {
         throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
       }
       
-      // Criar nome único para o arquivo SEM extensão (Cloudinary detecta automaticamente)
+      // Criar nome único COM extensão para preservar o formato
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}`;
+      const extensao = curriculoNome.split('.').pop().toLowerCase();
+      const nomeArquivo = `${nomeSeguro}_${timestamp}.${extensao}`;
+      const nomeUnico = `curriculos/${nomeArquivo}`;
       
       console.log('Fazendo upload:', nomeUnico);
       console.log('Arquivo original:', curriculoNome);
@@ -251,7 +253,7 @@ export const handler = async (event, context) => {
       const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
       
       console.log('Tamanho do base64:', base64Data.length);
-      console.log('Arquivo original:', curriculoNome);
+      console.log('Extensão:', extensao);
       
       // Para Node.js, usar diretamente o base64 com data URI
       const mimeType = getMimeType(curriculoNome);
@@ -262,9 +264,8 @@ export const handler = async (event, context) => {
       const formData = new FormData();
       formData.append('file', dataUri); // Usar data URI completo
       formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
-      formData.append('public_id', nomeUnico);
+      formData.append('public_id', nomeUnico); // COM extensão
       formData.append('resource_type', 'raw'); // Para documentos PDF/DOC
-      formData.append('original_filename', curriculoNome); // Nome original com extensão
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
@@ -278,9 +279,13 @@ export const handler = async (event, context) => {
       }
       
       const uploadResult = JSON.parse(responseText);
-      fileUrl = uploadResult.secure_url;
+      
+      // Adicionar parâmetro fl_attachment para forçar download com nome correto
+      const baseUrl = uploadResult.secure_url;
+      fileUrl = baseUrl.replace('/upload/', `/upload/fl_attachment:${nomeArquivo}/`);
       
       console.log('Upload realizado com sucesso:', fileUrl);
+      console.log('URL base:', baseUrl);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
