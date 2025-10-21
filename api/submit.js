@@ -29,51 +29,78 @@ function getMimeType(filename) {
   return mimeTypes[ext] || 'application/octet-stream';
 }
 
-export default async function handler(req, res) {
+export default async function handler(event, context) {
   // Configurar CORS de forma mais restritiva
   const allowedOrigins = [
-    'https://phoenix-recruitment.netlify.app',
+    'https://recrutamento-phoenix.netlify.app',
     'https://www.phoenixenglish.com.br',
     process.env.ALLOWED_ORIGIN || 'http://localhost:3000'
   ];
   
-  const origin = req.headers.origin;
+  const origin = event.headers.origin || event.headers.Origin;
   
-  if (req.method === 'OPTIONS') {
-    if (allowedOrigins.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Max-Age', '86400');
-    return res.status(200).end();
+  // Headers comuns
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block'
+  };
+  
+  // Adicionar CORS se origem permitida
+  if (allowedOrigins.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  
+  // Tratar OPTIONS (preflight)
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        ...headers,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400'
+      },
+      body: ''
+    };
   }
 
   // Apenas aceitar POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Método não permitido' })
+    };
   }
 
-  // Configurar CORS para requisição real
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  // Parse do body
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch (error) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ error: 'JSON inválido' })
+    };
   }
   
-  // Headers de segurança adicionais
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-
   // Validar tamanho do payload
-  if (!validatePayloadSize(req.body)) {
-    return res.status(413).json({ 
-      error: 'Payload muito grande',
-      details: 'Os dados enviados excedem o limite permitido'
-    });
+  if (!validatePayloadSize(body)) {
+    return {
+      statusCode: 413,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Payload muito grande',
+        details: 'Os dados enviados excedem o limite permitido'
+      })
+    };
   }
 
   // Extrair e sanitizar dados
-  let { nome, email, telefone, idade, curriculo, curriculoNome } = req.body;
+  let { nome, email, telefone, idade, curriculo, curriculoNome } = body;
   
   nome = sanitizeInput(nome);
   email = sanitizeInput(email);
@@ -83,53 +110,77 @@ export default async function handler(req, res) {
 
   // Validar campos obrigatórios
   if (!nome || !email || !telefone || !idade || !curriculo) {
-    return res.status(400).json({ 
-      error: 'Campos obrigatórios faltando',
-      details: 'Nome, email, telefone, idade e currículo são obrigatórios'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Campos obrigatórios faltando',
+        details: 'Nome, email, telefone, idade e currículo são obrigatórios'
+      })
+    };
   }
   
   // Validar formato do arquivo
   if (!curriculoNome || !curriculoNome.match(/\.(pdf|doc|docx)$/i)) {
-    return res.status(400).json({ 
-      error: 'Arquivo inválido',
-      details: 'O currículo deve ser um arquivo PDF, DOC ou DOCX'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Arquivo inválido',
+        details: 'O currículo deve ser um arquivo PDF, DOC ou DOCX'
+      })
+    };
   }
   
   // Validar comprimento mínimo
   if (nome.length < 2 || nome.length > 100) {
-    return res.status(400).json({ 
-      error: 'Nome inválido',
-      details: 'O nome deve ter entre 2 e 100 caracteres'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Nome inválido',
+        details: 'O nome deve ter entre 2 e 100 caracteres'
+      })
+    };
   }
 
   // Validar formato de email (mais rigoroso)
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email) || email.length > 254) {
-    return res.status(400).json({ 
-      error: 'Email inválido',
-      details: 'Por favor, forneça um email válido'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Email inválido',
+        details: 'Por favor, forneça um email válido'
+      })
+    };
   }
 
   // Validar telefone (formato brasileiro)
   const telefoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
   if (!telefoneRegex.test(telefone)) {
-    return res.status(400).json({ 
-      error: 'Telefone inválido',
-      details: 'Por favor, forneça um telefone no formato (99) 99999-9999'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Telefone inválido',
+        details: 'Por favor, forneça um telefone no formato (99) 99999-9999'
+      })
+    };
   }
   
   // Validar idade
   const idadeNum = parseInt(idade);
   if (isNaN(idadeNum) || idadeNum < 16 || idadeNum > 99) {
-    return res.status(400).json({ 
-      error: 'Idade inválida',
-      details: 'A idade deve estar entre 16 e 99 anos'
-    });
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Idade inválida',
+        details: 'A idade deve estar entre 16 e 99 anos'
+      })
+    };
   }
 
   try {
@@ -150,10 +201,14 @@ export default async function handler(req, res) {
     // Verificar se as variáveis de ambiente estão configuradas
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID || !process.env.DRIVE_FOLDER_ID) {
       console.error('Variáveis de ambiente não configuradas');
-      return res.status(500).json({ 
-        error: 'Erro de configuração do servidor',
-        details: 'As credenciais do Google não estão configuradas'
-      });
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Erro de configuração do servidor',
+          details: 'As credenciais do Google não estão configuradas'
+        })
+      };
     }
     
     // Upload do currículo para o Google Drive
@@ -245,10 +300,14 @@ export default async function handler(req, res) {
     }
 
     // Resposta de sucesso
-    return res.status(200).json({ 
-      success: true,
-      message: 'Candidatura enviada com sucesso!'
-    });
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        success: true,
+        message: 'Candidatura enviada com sucesso!'
+      })
+    };
 
   } catch (error) {
     console.error('Erro no backend:', error?.message || error);
@@ -258,9 +317,13 @@ export default async function handler(req, res) {
       ? error?.message 
       : 'Erro ao processar sua candidatura';
 
-    return res.status(500).json({ 
-      error: 'Erro interno do servidor',
-      details: errorMessage
-    });
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ 
+        error: 'Erro interno do servidor',
+        details: errorMessage
+      })
+    };
   }
 }
