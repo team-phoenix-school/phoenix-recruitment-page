@@ -55,6 +55,8 @@ Para o formulário funcionar, você DEVE configurar as variáveis de ambiente no
 3. **Configurar Variáveis de Ambiente no Netlify**
    - `SHEET_ID`: ID da planilha
    - `GOOGLE_SERVICE_ACCOUNT_KEY`: Conteúdo do JSON (em uma linha)
+   - `DRIVE_FOLDER_ID`: ID da pasta no Google Drive (opcional se usar shared drive)
+   - `SHARED_DRIVE_ID`: ID do shared drive (recomendado para evitar quota de storage)
    - `NODE_ENV`: production
 
 4. **Deploy**

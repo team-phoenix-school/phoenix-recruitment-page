@@ -197,9 +197,10 @@ export const handler = async (event, context) => {
     const drive = google.drive({ version: 'v3', auth });
     const sheetId = process.env.SHEET_ID;
     const driveFolderId = process.env.DRIVE_FOLDER_ID;
+    const sharedDriveId = process.env.SHARED_DRIVE_ID; // Nova variável para shared drive
 
     // Verificar se as variáveis de ambiente estão configuradas
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID || !process.env.DRIVE_FOLDER_ID) {
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID) {
       console.error('Variáveis de ambiente não configuradas');
       return {
         statusCode: 500,
@@ -207,6 +208,19 @@ export const handler = async (event, context) => {
         body: JSON.stringify({ 
           error: 'Erro de configuração do servidor',
           details: 'As credenciais do Google não estão configuradas'
+        })
+      };
+    }
+
+    // Verificar se pelo menos um local de armazenamento está configurado
+    if (!driveFolderId && !sharedDriveId) {
+      console.error('Nenhum local de armazenamento configurado');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Erro de configuração do servidor',
+          details: 'Local de armazenamento não configurado'
         })
       };
     }
@@ -223,33 +237,59 @@ export const handler = async (event, context) => {
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
       const nomeUnico = `${nomeSeguro}_${timestamp}_${curriculoNome}`;
       
-      // Upload para o Drive
+      // Configurar metadados do arquivo baseado no tipo de armazenamento
       const fileMetadata = {
-        name: nomeUnico,
-        parents: [driveFolderId]
+        name: nomeUnico
       };
+
+      // Se temos um shared drive, usar ele; caso contrário, usar pasta normal
+      if (sharedDriveId) {
+        // Para shared drives, definir o drive pai
+        fileMetadata.driveId = sharedDriveId;
+        if (driveFolderId) {
+          fileMetadata.parents = [driveFolderId];
+        }
+      } else if (driveFolderId) {
+        // Para pastas normais
+        fileMetadata.parents = [driveFolderId];
+      }
       
       const media = {
         mimeType: getMimeType(curriculoNome),
         body: Readable.from(buffer)
       };
       
-      const file = await drive.files.create({
+      // Configurar parâmetros da requisição
+      const createParams = {
         requestBody: fileMetadata,
         media: media,
         fields: 'id, webViewLink',
         supportsAllDrives: true
-      });
+      };
+
+      // Se estamos usando shared drive, adicionar parâmetro específico
+      if (sharedDriveId) {
+        createParams.supportsTeamDrives = true;
+      }
       
-      // Tornar o arquivo acessível com o link
-      await drive.permissions.create({
+      const file = await drive.files.create(createParams);
+      
+      // Configurar permissões
+      const permissionParams = {
         fileId: file.data.id,
         requestBody: {
           role: 'reader',
           type: 'anyone'
         },
         supportsAllDrives: true
-      });
+      };
+
+      if (sharedDriveId) {
+        permissionParams.supportsTeamDrives = true;
+      }
+      
+      // Tornar o arquivo acessível com o link
+      await drive.permissions.create(permissionParams);
       
       fileUrl = file.data.webViewLink;
       
