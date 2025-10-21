@@ -205,6 +205,10 @@ export const handler = async (event, context) => {
       DRIVE_FOLDER_ID: driveFolderId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
       SHARED_DRIVE_ID: sharedDriveId ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
     });
+    
+    // Debug do Service Account
+    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+    console.log('Service Account email:', credentials.client_email);
 
     // Verificar se as variáveis de ambiente estão configuradas
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID) {
@@ -219,18 +223,8 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Verificar se pelo menos um local de armazenamento está configurado
-    if (!driveFolderId && !sharedDriveId) {
-      console.error('Nenhum local de armazenamento configurado');
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ 
-          error: 'Erro de configuração do servidor',
-          details: 'Local de armazenamento não configurado'
-        })
-      };
-    }
+    // Nota: Arquivos serão salvos no Drive pessoal do Service Account
+    console.log('Configuração: Upload direto para Drive do Service Account');
     
     // Upload do currículo para o Google Drive
     let fileUrl = '';
@@ -249,58 +243,31 @@ export const handler = async (event, context) => {
         name: nomeUnico
       };
 
-      // Se temos um shared drive, usar ele; caso contrário, usar pasta normal
-      if (sharedDriveId) {
-        console.log('Usando shared drive:', sharedDriveId);
-        // Para shared drives, apenas definir a pasta se especificada
-        if (driveFolderId) {
-          fileMetadata.parents = [driveFolderId];
-          console.log('Com pasta específica no shared drive:', driveFolderId);
-        }
-      } else if (driveFolderId) {
-        console.log('Usando pasta normal:', driveFolderId);
-        // Para pastas normais
-        fileMetadata.parents = [driveFolderId];
-      } else {
-        console.log('Nenhum local de armazenamento específico configurado');
-      }
+      // Upload direto para o Drive pessoal do Service Account (sem pasta específica)
+      console.log('Fazendo upload direto para o Drive do Service Account');
       
       const media = {
         mimeType: getMimeType(curriculoNome),
         body: Readable.from(buffer)
       };
       
-      // Configurar parâmetros da requisição
+      // Configurar parâmetros da requisição (simples, sem shared drive)
       const createParams = {
         requestBody: fileMetadata,
         media: media,
-        fields: 'id, webViewLink',
-        supportsAllDrives: true
+        fields: 'id, webViewLink'
       };
-
-      // Se estamos usando shared drive, adicionar parâmetros específicos
-      if (sharedDriveId) {
-        createParams.supportsTeamDrives = true;
-        createParams.driveId = sharedDriveId;
-        console.log('Configurando upload para shared drive:', sharedDriveId);
-      }
       
       const file = await drive.files.create(createParams);
       
-      // Configurar permissões
+      // Configurar permissões (simples)
       const permissionParams = {
         fileId: file.data.id,
         requestBody: {
           role: 'reader',
           type: 'anyone'
-        },
-        supportsAllDrives: true
+        }
       };
-
-      if (sharedDriveId) {
-        permissionParams.supportsTeamDrives = true;
-        permissionParams.driveId = sharedDriveId;
-      }
       
       // Tornar o arquivo acessível com o link
       await drive.permissions.create(permissionParams);
