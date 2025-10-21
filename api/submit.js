@@ -223,51 +223,42 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Nota: Arquivos serão salvos no Drive pessoal do Service Account
-    console.log('Configuração: Upload direto para Drive do Service Account');
+    // Configuração: Upload via Cloudinary
+    console.log('Configuração: Upload de arquivos via Cloudinary');
     
     // Upload do arquivo usando Cloudinary (gratuito)
     let fileUrl = '';
     try {
       console.log('Iniciando upload do currículo...');
-      console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
-      console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
       
       // Verificar se Cloudinary está configurado
       if (!process.env.CLOUDINARY_CLOUD_NAME) {
         throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
       }
       
-      // Criar nome único para o arquivo
+      // Criar nome único para o arquivo mantendo a extensão
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}`;
+      const extensao = curriculoNome.split('.').pop().toLowerCase();
+      const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}.${extensao}`;
       
-      console.log('Nome único do arquivo:', nomeUnico);
-      console.log('Tamanho do currículo (base64):', curriculo.length);
+      console.log('Fazendo upload:', nomeUnico);
       
-      // Upload para Cloudinary
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
-      console.log('URL do Cloudinary:', cloudinaryUrl);
+      // Upload para Cloudinary (como auto para detectar tipo automaticamente)
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/auto/upload`;
       
       const formData = new FormData();
       formData.append('file', curriculo); // Base64 data
       formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
       formData.append('public_id', nomeUnico);
-      formData.append('resource_type', 'raw');
-      
-      console.log('Enviando requisição para Cloudinary...');
+      formData.append('resource_type', 'auto'); // Deixa o Cloudinary detectar o tipo
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData
       });
       
-      console.log('Status da resposta:', uploadResponse.status);
-      console.log('Headers da resposta:', Object.fromEntries(uploadResponse.headers.entries()));
-      
       const responseText = await uploadResponse.text();
-      console.log('Resposta do Cloudinary:', responseText);
       
       if (!uploadResponse.ok) {
         throw new Error(`Cloudinary upload failed: ${uploadResponse.status} - ${responseText}`);
