@@ -202,8 +202,8 @@ export const handler = async (event, context) => {
     // Debug das variáveis de ambiente
     console.log('Variáveis de ambiente:', {
       SHEET_ID: sheetId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
-      DRIVE_FOLDER_ID: driveFolderId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
-      SHARED_DRIVE_ID: sharedDriveId ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
+      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
+      CLOUDINARY_UPLOAD_PRESET: process.env.CLOUDINARY_UPLOAD_PRESET ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
     });
     
     // Debug do Service Account
@@ -230,14 +230,25 @@ export const handler = async (event, context) => {
     let fileUrl = '';
     try {
       console.log('Iniciando upload do currículo...');
+      console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
+      console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
+      
+      // Verificar se Cloudinary está configurado
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
+      }
       
       // Criar nome único para o arquivo
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
       const nomeUnico = `curriculos/${nomeSeguro}_${timestamp}`;
       
+      console.log('Nome único do arquivo:', nomeUnico);
+      console.log('Tamanho do currículo (base64):', curriculo.length);
+      
       // Upload para Cloudinary
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
+      console.log('URL do Cloudinary:', cloudinaryUrl);
       
       const formData = new FormData();
       formData.append('file', curriculo); // Base64 data
@@ -245,27 +256,36 @@ export const handler = async (event, context) => {
       formData.append('public_id', nomeUnico);
       formData.append('resource_type', 'raw');
       
+      console.log('Enviando requisição para Cloudinary...');
+      
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData
       });
       
+      console.log('Status da resposta:', uploadResponse.status);
+      console.log('Headers da resposta:', Object.fromEntries(uploadResponse.headers.entries()));
+      
+      const responseText = await uploadResponse.text();
+      console.log('Resposta do Cloudinary:', responseText);
+      
       if (!uploadResponse.ok) {
-        throw new Error(`Cloudinary upload failed: ${uploadResponse.status}`);
+        throw new Error(`Cloudinary upload failed: ${uploadResponse.status} - ${responseText}`);
       }
       
-      const uploadResult = await uploadResponse.json();
+      const uploadResult = JSON.parse(responseText);
       fileUrl = uploadResult.secure_url;
       
       console.log('Upload realizado com sucesso:', fileUrl);
       
     } catch (uploadError) {
-      console.error('Erro ao fazer upload do currículo:', uploadError);
+      console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
+      console.error('Stack trace:', uploadError.stack);
       
       // Fallback: salvar informações do arquivo sem o upload
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      fileUrl = `ARQUIVO_NAO_SALVO: ${curriculoNome} (${nomeSeguro}_${timestamp}) - Configure Cloudinary`;
+      fileUrl = `ARQUIVO_NAO_SALVO: ${curriculoNome} (${nomeSeguro}_${timestamp}) - Erro: ${uploadError.message}`;
       
       console.log('Usando fallback para arquivo:', fileUrl);
     }
