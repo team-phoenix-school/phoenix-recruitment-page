@@ -237,7 +237,8 @@ export const handler = async (event, context) => {
       const file = await drive.files.create({
         requestBody: fileMetadata,
         media: media,
-        fields: 'id, webViewLink'
+        fields: 'id, webViewLink',
+        supportsAllDrives: true
       });
       
       // Tornar o arquivo acessível com o link
@@ -246,7 +247,8 @@ export const handler = async (event, context) => {
         requestBody: {
           role: 'reader',
           type: 'anyone'
-        }
+        },
+        supportsAllDrives: true
       });
       
       fileUrl = file.data.webViewLink;
