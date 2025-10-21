@@ -210,7 +210,9 @@ export default async function handler(req, res) {
       // Usar URLSearchParams para simular form-data
       const formData = new URLSearchParams();
       formData.append('file', curriculo);
-      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
+      formData.append('upload_preset', 'ml_default'); // Usar preset padrão do Cloudinary
+      
+      console.log('Tentando com preset padrão ml_default...');
       
       console.log('Dados sendo enviados:');
       console.log('- upload_preset:', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
