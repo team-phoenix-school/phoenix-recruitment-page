@@ -227,7 +227,14 @@ export const handler = async (event, context) => {
     
     // Upload do currículo para o Google Drive
     let fileUrl = '';
-    try {
+    
+    // Verificar se temos configuração adequada para upload
+    if (!sharedDriveId && driveFolderId) {
+      console.warn('AVISO: Usando pasta normal pode causar erro de quota. Configure SHARED_DRIVE_ID.');
+      // Temporariamente desabilitar upload para evitar erro
+      fileUrl = 'Upload temporariamente desabilitado - Configure SHARED_DRIVE_ID';
+    } else {
+      try {
       // Remover prefixo data:... do base64
       const base64Data = curriculo.split(',')[1] || curriculo;
       const buffer = Buffer.from(base64Data, 'base64');
@@ -308,6 +315,7 @@ export const handler = async (event, context) => {
         data: uploadError.response?.data
       });
       throw new Error('Falha ao salvar o currículo');
+    }
     }
 
     // Preparar data/hora no formato brasileiro
