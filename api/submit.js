@@ -231,12 +231,10 @@ export default async function handler(req, res) {
       
       const uploadResult = JSON.parse(responseText);
       
-      // Adicionar parâmetro fl_attachment para forçar download com nome correto
-      const baseUrl = uploadResult.secure_url;
-      fileUrl = baseUrl.replace('/upload/', `/upload/fl_attachment:${nomeArquivo}/`);
+      // Usar URL direta do Cloudinary (para raw files, não precisa de transformações)
+      fileUrl = uploadResult.secure_url;
       
       console.log('Upload realizado com sucesso:', fileUrl);
-      console.log('URL base:', baseUrl);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
