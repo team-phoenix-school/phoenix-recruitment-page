@@ -198,6 +198,13 @@ export const handler = async (event, context) => {
     const sheetId = process.env.SHEET_ID;
     const driveFolderId = process.env.DRIVE_FOLDER_ID;
     const sharedDriveId = process.env.SHARED_DRIVE_ID; // Nova variável para shared drive
+    
+    // Debug das variáveis de ambiente
+    console.log('Variáveis de ambiente:', {
+      SHEET_ID: sheetId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
+      DRIVE_FOLDER_ID: driveFolderId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
+      SHARED_DRIVE_ID: sharedDriveId ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
+    });
 
     // Verificar se as variáveis de ambiente estão configuradas
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID) {
@@ -227,14 +234,7 @@ export const handler = async (event, context) => {
     
     // Upload do currículo para o Google Drive
     let fileUrl = '';
-    
-    // Verificar se temos configuração adequada para upload
-    if (!sharedDriveId && driveFolderId) {
-      console.warn('AVISO: Usando pasta normal pode causar erro de quota. Configure SHARED_DRIVE_ID.');
-      // Temporariamente desabilitar upload para evitar erro
-      fileUrl = 'Upload temporariamente desabilitado - Configure SHARED_DRIVE_ID';
-    } else {
-      try {
+    try {
       // Remover prefixo data:... do base64
       const base64Data = curriculo.split(',')[1] || curriculo;
       const buffer = Buffer.from(base64Data, 'base64');
@@ -315,7 +315,6 @@ export const handler = async (event, context) => {
         data: uploadError.response?.data
       });
       throw new Error('Falha ao salvar o currículo');
-    }
     }
 
     // Preparar data/hora no formato brasileiro
