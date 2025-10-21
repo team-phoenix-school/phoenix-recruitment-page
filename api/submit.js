@@ -192,9 +192,8 @@ export default async function handler(req, res) {
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
       const extensao = curriculoNome.split('.').pop().toLowerCase();
       const nomeArquivo = `${nomeSeguro}_${timestamp}.${extensao}`;
-      const nomeUnico = `curriculos/${nomeArquivo}`;
       
-      console.log('Fazendo upload:', nomeUnico);
+      console.log('Fazendo upload:', nomeArquivo);
       console.log('Arquivo original:', curriculoNome);
       
       // Upload para Cloudinary como raw (para documentos)
@@ -207,7 +206,8 @@ export default async function handler(req, res) {
       const uploadData = {
         file: curriculo, // Data URI completo do frontend
         upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos',
-        public_id: nomeUnico,
+        public_id: nomeArquivo, // SEM pasta (pasta vai no folder)
+        folder: 'curriculos', // Pasta separada
         resource_type: 'raw'
       };
       
