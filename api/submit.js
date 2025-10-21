@@ -205,10 +205,8 @@ export default async function handler(req, res) {
       // Preparar dados para upload (usar o curriculo que já vem como data URI do frontend)
       const uploadData = {
         file: curriculo, // Data URI completo do frontend
-        upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos',
-        public_id: nomeArquivo, // SEM pasta (pasta vai no folder)
-        folder: 'curriculos', // Pasta separada
-        resource_type: 'raw'
+        upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos'
+        // Não incluir public_id nem folder - deixar o preset controlar
       };
       
       console.log('Enviando para Cloudinary...');
