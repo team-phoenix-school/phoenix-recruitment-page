@@ -207,25 +207,31 @@ export default async function handler(req, res) {
       console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
       console.log('URL do Cloudinary:', cloudinaryUrl);
       
-      // Usar URLSearchParams para simular form-data
-      const formData = new URLSearchParams();
-      formData.append('file', curriculo);
-      formData.append('upload_preset', 'ml_default'); // Usar preset padrão do Cloudinary
+      // Criar boundary para multipart/form-data manualmente
+      const boundary = '----formdata-' + Math.random().toString(36);
+      const CRLF = '\r\n';
       
-      console.log('Tentando com preset padrão ml_default...');
+      // Construir multipart body manualmente
+      let body = '';
+      body += `--${boundary}${CRLF}`;
+      body += `Content-Disposition: form-data; name="file"${CRLF}`;
+      body += `Content-Type: application/octet-stream${CRLF}${CRLF}`;
+      body += curriculo + CRLF;
+      body += `--${boundary}${CRLF}`;
+      body += `Content-Disposition: form-data; name="upload_preset"${CRLF}${CRLF}`;
+      body += 'ml_default' + CRLF;
+      body += `--${boundary}--${CRLF}`;
       
-      console.log('Dados sendo enviados:');
-      console.log('- upload_preset:', process.env.CLOUDINARY_UPLOAD_PRESET || 'phoenix_curriculos');
-      console.log('- file size:', curriculo.length);
-      
-      console.log('Enviando para Cloudinary...');
+      console.log('Enviando multipart/form-data para Cloudinary...');
+      console.log('Boundary:', boundary);
+      console.log('Body size:', body.length);
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': `multipart/form-data; boundary=${boundary}`
         },
-        body: formData
+        body: body
       });
       
       const responseText = await uploadResponse.text();
