@@ -187,11 +187,11 @@ export default async function handler(req, res) {
         throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
       }
       
-      // Criar nome único COM extensão para preservar o formato
+      // Criar nome do arquivo usando o nome da pessoa
       const timestamp = Date.now();
-      const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
+      const nomeSeguro = nome.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
       const extensao = curriculoNome.split('.').pop().toLowerCase();
-      const nomeArquivo = `${nomeSeguro}_${timestamp}.${extensao}`;
+      const nomeArquivo = `Curriculo_${nomeSeguro}.${extensao}`;
       
       console.log('Fazendo upload:', nomeArquivo);
       console.log('Arquivo original:', curriculoNome);
@@ -214,12 +214,15 @@ export default async function handler(req, res) {
       // Construir multipart body manualmente
       let body = '';
       body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="file"${CRLF}`;
+      body += `Content-Disposition: form-data; name="file"; filename="${nomeArquivo}"${CRLF}`;
       body += `Content-Type: application/octet-stream${CRLF}${CRLF}`;
       body += curriculo + CRLF;
       body += `--${boundary}${CRLF}`;
       body += `Content-Disposition: form-data; name="upload_preset"${CRLF}${CRLF}`;
       body += 'ml_default' + CRLF;
+      body += `--${boundary}${CRLF}`;
+      body += `Content-Disposition: form-data; name="public_id"${CRLF}${CRLF}`;
+      body += `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}` + CRLF;
       body += `--${boundary}--${CRLF}`;
       
       console.log('Enviando multipart/form-data para Cloudinary...');
@@ -242,10 +245,14 @@ export default async function handler(req, res) {
       
       const uploadResult = JSON.parse(responseText);
       
-      // Usar URL direta do Cloudinary (para raw files, não precisa de transformações)
-      fileUrl = uploadResult.secure_url;
+      // Criar URL de download com nome correto
+      const baseUrl = uploadResult.secure_url;
+      // Adicionar parâmetro para forçar download com nome da pessoa
+      fileUrl = baseUrl + `?dl=${encodeURIComponent(nomeArquivo)}`;
       
       console.log('Upload realizado com sucesso:', fileUrl);
+      console.log('URL base:', baseUrl);
+      console.log('Nome do arquivo:', nomeArquivo);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
