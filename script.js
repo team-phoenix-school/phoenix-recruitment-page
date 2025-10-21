@@ -190,6 +190,14 @@ async function enviarParaGoogleSheets() {
       body: JSON.stringify(dados)
     });
     
+    // Verificar se a resposta é JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Resposta não é JSON:', text);
+      throw new Error('Erro no servidor. Por favor, tente novamente mais tarde.');
+    }
+    
     const result = await response.json();
     
     if (response.ok && result.success) {
@@ -206,7 +214,7 @@ async function enviarParaGoogleSheets() {
     }
     
   } catch (error) {
-    console.error('Erro:', error);
+    console.error('Erro completo:', error);
     alert(error.message || 'Erro ao enviar candidatura. Tente novamente.');
     mostrarEtapa('formulario-section');
   }

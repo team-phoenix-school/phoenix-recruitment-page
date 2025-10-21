@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { Readable } from 'stream';
 
 // Função para sanitizar entrada e prevenir XSS
 function sanitizeInput(input) {
@@ -175,7 +176,7 @@ export default async function handler(req, res) {
       
       const media = {
         mimeType: getMimeType(curriculoNome),
-        body: require('stream').Readable.from(buffer)
+        body: Readable.from(buffer)
       };
       
       const file = await drive.files.create({
