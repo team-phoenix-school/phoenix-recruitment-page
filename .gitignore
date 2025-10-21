@@ -64,10 +64,15 @@ Thumbs.db
 # Netlify
 .netlify/
 
+# Vercel
+.vercel
+.vercel/
+
 # Local development
 dist/
 build/
 .cache/
+.next/
 
 # Backup files
 *.bak

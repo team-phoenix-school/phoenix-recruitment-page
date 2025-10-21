@@ -5,7 +5,8 @@ Landing page simplificada para processo seletivo da Phoenix English School.
 ## 🚀 Características
 
 - **Design responsivo** baseado no estilo original da Phoenix
-- **Formulário integrado** com API segura via Netlify Functions
+- **Formulário integrado** com API segura via Vercel Functions
+- **Upload de arquivos** via Cloudinary (gratuito)
 - **Autenticação segura** com Google Service Account
 - **Cores e fontes** mantidas do design original
 - **Otimizada para conversão** de candidatos
@@ -23,45 +24,44 @@ Landing page simplificada para processo seletivo da Phoenix English School.
 
 ## 🛠️ Configuração
 
-### Deploy no Netlify
+### Deploy no Vercel (Recomendado)
 
-1. Faça upload dos arquivos para um repositório GitHub
-2. Conecte o repositório ao Netlify
-3. O site será automaticamente deployado
-4. Os formulários serão processados pelo Netlify Forms
-
-### Integração com Google Sheets (API Segura)
-
-Esta landing page usa uma **API segura via Netlify Functions** com autenticação Google Service Account.
-
-#### ⚠️ Configuração Obrigatória
-
-Para o formulário funcionar, você DEVE configurar as variáveis de ambiente no Netlify.
-
-**📖 Consulte o arquivo [SECURITY-SETUP.md](SECURITY-SETUP.md) para instruções detalhadas.**
+**📖 Consulte o arquivo [GUIA-VERCEL.md](GUIA-VERCEL.md) para instruções completas de deploy.**
 
 #### Resumo Rápido:
 
-1. **Criar Service Account no Google Cloud**
-   - Ativar Google Sheets API
-   - Criar credenciais de Service Account
-   - Baixar arquivo JSON com as credenciais
+1. Faça upload dos arquivos para um repositório GitHub
+2. Conecte o repositório ao Vercel
+3. Configure as variáveis de ambiente
+4. Deploy automático!
 
-2. **Configurar Google Sheets**
-   - Criar planilha com aba "Candidatos"
-   - Compartilhar com email da Service Account
-   - Adicionar cabeçalhos: Data/Hora, Nome, Email, Telefone, Cargo, Experiência, Motivação, Status
+### Integração com Google Sheets + Cloudinary
 
-3. **Configurar Variáveis de Ambiente no Netlify**
-   - `SHEET_ID`: ID da planilha
-   - `GOOGLE_SERVICE_ACCOUNT_KEY`: Conteúdo do JSON (em uma linha)
-   - `DRIVE_FOLDER_ID`: ID da pasta no Google Drive (opcional se usar shared drive)
-   - `SHARED_DRIVE_ID`: ID do shared drive (recomendado para evitar quota de storage)
-   - `NODE_ENV`: production
+Esta landing page usa:
+- **Vercel Functions** para API segura
+- **Cloudinary** para upload de arquivos (gratuito)
+- **Google Service Account** para autenticação
+- **Google Sheets** para armazenar dados
 
-4. **Deploy**
-   - Fazer push para o repositório
-   - Netlify fará o build automaticamente
+#### ⚠️ Configuração Obrigatória
+
+Para o formulário funcionar, você DEVE configurar as variáveis de ambiente no Vercel.
+
+**📖 Consulte o arquivo [GUIA-VERCEL.md](GUIA-VERCEL.md) para instruções detalhadas.**
+
+#### Variáveis de Ambiente Necessárias:
+
+**Google:**
+- `SHEET_ID`: ID da planilha Google Sheets
+- `GOOGLE_SERVICE_ACCOUNT_KEY`: Credenciais do Service Account (JSON)
+
+**Cloudinary:**
+- `CLOUDINARY_CLOUD_NAME`: Nome da sua conta Cloudinary
+- `CLOUDINARY_UPLOAD_PRESET`: Nome do upload preset (ex: `phoenix_curriculos`)
+
+**Opcional:**
+- `NODE_ENV`: production
+- `ALLOWED_ORIGIN`: Domínio customizado
 
 #### 🔒 Por que esta arquitetura é mais segura?
 
@@ -124,19 +124,24 @@ Para adicionar analytics, inclua o código do Google Analytics no `<head>` do HT
 
 ## 🚀 Deploy
 
-### Netlify (Recomendado)
+### Vercel (Recomendado)
 
-1. Conecte seu repositório GitHub ao Netlify
-2. Configure as build settings:
-   - Build command: (deixe vazio)
-   - Publish directory: `.`
+1. Conecte seu repositório GitHub ao Vercel
+2. Configure as variáveis de ambiente
 3. Deploy automático a cada push
+
+**Vantagens do Vercel:**
+- ✅ Deploy automático
+- ✅ HTTPS gratuito
+- ✅ Serverless Functions integradas
+- ✅ Edge Network global
+- ✅ Analytics incluído
 
 ### Outras Opções
 
-- **Vercel**: Também suporta formulários
-- **GitHub Pages**: Apenas arquivos estáticos
-- **Hospedagem tradicional**: Upload via FTP
+- **Netlify**: Também funciona (requer adaptação do código)
+- **GitHub Pages**: Não suporta serverless functions
+- **Hospedagem tradicional**: Requer servidor Node.js
 
 ## 📞 Suporte
 
