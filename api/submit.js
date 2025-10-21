@@ -207,34 +207,22 @@ export default async function handler(req, res) {
       console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
       console.log('URL do Cloudinary:', cloudinaryUrl);
       
-      // Criar boundary para multipart/form-data manualmente
-      const boundary = '----formdata-' + Math.random().toString(36);
-      const CRLF = '\r\n';
+      // Simplificar - usar apenas JSON com data URI
+      const uploadData = {
+        file: curriculo,
+        upload_preset: 'ml_default'
+      };
       
-      // Construir multipart body manualmente
-      let body = '';
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="file"; filename="${nomeArquivo}"${CRLF}`;
-      body += `Content-Type: application/octet-stream${CRLF}${CRLF}`;
-      body += curriculo + CRLF;
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="upload_preset"${CRLF}${CRLF}`;
-      body += 'ml_default' + CRLF;
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="public_id"${CRLF}${CRLF}`;
-      body += `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}` + CRLF;
-      body += `--${boundary}--${CRLF}`;
-      
-      console.log('Enviando multipart/form-data para Cloudinary...');
-      console.log('Boundary:', boundary);
-      console.log('Body size:', body.length);
+      console.log('Enviando JSON para Cloudinary...');
+      console.log('Upload preset:', 'ml_default');
+      console.log('File size:', curriculo.length);
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': `multipart/form-data; boundary=${boundary}`
+          'Content-Type': 'application/json'
         },
-        body: body
+        body: JSON.stringify(uploadData)
       });
       
       const responseText = await uploadResponse.text();
@@ -245,14 +233,11 @@ export default async function handler(req, res) {
       
       const uploadResult = JSON.parse(responseText);
       
-      // Criar URL de download com nome correto
-      const baseUrl = uploadResult.secure_url;
-      // Adicionar parâmetro para forçar download com nome da pessoa
-      fileUrl = baseUrl + `?dl=${encodeURIComponent(nomeArquivo)}`;
+      // Usar URL direta do Cloudinary
+      fileUrl = uploadResult.secure_url;
       
       console.log('Upload realizado com sucesso:', fileUrl);
-      console.log('URL base:', baseUrl);
-      console.log('Nome do arquivo:', nomeArquivo);
+      console.log('Nome do arquivo gerado:', nomeArquivo);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
