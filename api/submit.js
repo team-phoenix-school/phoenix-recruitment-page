@@ -190,11 +190,30 @@ export default async function handler(req, res) {
       });
     }
 
-    // Upload via Dropbox
+    // Upload via Dropbox com OAuth2
     let fileUrl = '';
     try {
-      // Verificar se Dropbox está configurado
-      if (!process.env.DROPBOX_ACCESS_TOKEN) {
+      // Obter access token válido (renovar se necessário)
+      let accessToken = process.env.DROPBOX_ACCESS_TOKEN;
+      
+      // Se temos refresh token, tentar renovar automaticamente
+      if (process.env.DROPBOX_REFRESH_TOKEN) {
+        try {
+          const tokenResponse = await fetch(`${req.headers.origin || 'https://recrutamento-phoenix.vercel.app'}/api/dropbox-auth`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (tokenResponse.ok) {
+            const tokenData = await tokenResponse.json();
+            accessToken = tokenData.access_token;
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed, using stored token:', refreshError.message);
+        }
+      }
+      
+      if (!accessToken) {
         throw new Error('Serviço de upload não configurado');
       }
       
@@ -224,7 +243,7 @@ export default async function handler(req, res) {
       const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/octet-stream',
           'Dropbox-API-Arg': JSON.stringify({
             path: caminhoArquivo,
@@ -255,7 +274,7 @@ export default async function handler(req, res) {
         const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -274,7 +293,7 @@ export default async function handler(req, res) {
             const listResponse = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
               method: 'POST',
               headers: {
-                'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+                'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
