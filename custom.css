@@ -1,0 +1,157 @@
+/* Melhorias para scroll suave e experiência mobile */
+
+/* Scroll suave para toda a página */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Melhor alinhamento para seção de contato no mobile */
+@media (max-width: 768px) {
+  #contato .grid > div {
+    justify-content: flex-start !important;
+    padding-left: 1rem;
+  }
+  
+  #contato .grid > div .text-left {
+    min-width: 0;
+    word-break: break-word;
+  }
+}
+
+/* Animação suave para transições de etapas */
+.etapa {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.etapa.ativa {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Melhor visualização do loading */
+#loading {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Melhor visualização da confirmação */
+#confirmacao {
+  min-height: 300px;
+  padding: 2rem 0;
+}
+
+/* Scroll offset para navegação âncora */
+section[id] {
+  scroll-margin-top: 80px;
+}
+
+/* Melhor responsividade para o formulário */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Ajuste para inputs no mobile */
+  input, select, textarea {
+    font-size: 16px; /* Previne zoom no iOS */
+  }
+}
+
+/* Animação para o botão de envio */
+button[type="submit"] {
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 2, 64, 0.3);
+}
+
+/* Melhor feedback visual para campos obrigatórios */
+input:invalid, select:invalid, textarea:invalid {
+  border-color: #ef4444 !important;
+}
+
+input:valid, select:valid, textarea:valid {
+  border-color: #10b981 !important;
+}
+
+/* Animação para alertas */
+.alert-animation {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Melhor estilização para o upload de arquivo */
+.file-input-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input-wrapper:hover {
+  transform: translateY(-1px);
+}
+
+/* Loading spinner personalizado */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #A70240;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Melhor contraste para acessibilidade */
+@media (prefers-contrast: high) {
+  .text-gray-300 {
+    color: #e5e7eb !important;
+  }
+  
+  .bg-phoenix-magenta {
+    background-color: #8B0000 !important;
+  }
+}
+
+/* Suporte para modo escuro do sistema */
+@media (prefers-color-scheme: dark) {
+  /* Já está implementado com fundo preto */
+}
+
+/* Melhor foco para navegação por teclado */
+input:focus, select:focus, textarea:focus, button:focus {
+  outline: 2px solid #A70240;
+  outline-offset: 2px;
+}
+
+/* Animação para elementos que entram na tela */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

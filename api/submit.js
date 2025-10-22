@@ -198,7 +198,7 @@ export default async function handler(req, res) {
         throw new Error('Serviço de upload não configurado');
       }
       
-      // Criar nome do arquivo usando o nome da pessoa + timestamp para evitar duplicatas
+      // Criar nome do arquivo usando o nome da pessoa + timestamp para evitar conflitos
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
       const extensao = curriculoNome.split('.').pop().toLowerCase();
@@ -248,7 +248,7 @@ export default async function handler(req, res) {
         throw new Error('Erro no serviço de upload');
       }
       
-      // Criar link de compartilhamento
+      // Criar link de compartilhamento (com tratamento para link existente)
       let shareResult;
       
       try {
@@ -269,7 +269,7 @@ export default async function handler(req, res) {
         const shareResponseText = await shareResponse.text();
         
         if (shareResponse.status === 409) {
-          // Link já existe, tentar obter o link existente
+          // Link já existe, buscar o link existente
           const listResponse = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
             method: 'POST',
             headers: {
@@ -277,7 +277,8 @@ export default async function handler(req, res) {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              path: uploadResult.path_display
+              path: uploadResult.path_display,
+              direct_only: true
             })
           });
           
@@ -290,21 +291,18 @@ export default async function handler(req, res) {
               throw new Error('Não foi possível obter link do arquivo');
             }
           } else {
-            throw new Error('Erro ao obter link existente');
+            throw new Error('Erro ao buscar link existente');
           }
         } else if (!shareResponse.ok) {
-          throw new Error(`Erro no serviço de compartilhamento: ${shareResponse.status}`);
+          throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
         } else {
           shareResult = JSON.parse(shareResponseText);
         }
       } catch (parseError) {
-        if (parseError.message.includes('serviço')) {
-          throw parseError;
-        }
         throw new Error('Erro ao processar link de compartilhamento');
       }
       
-      if (shareResult.url) {
+      if (shareResult && shareResult.url) {
         // Converter para link de download direto
         fileUrl = shareResult.url.replace('?dl=0', '?dl=1');
       } else {

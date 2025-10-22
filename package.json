@@ -7,7 +7,7 @@
     "start": "python -m http.server 8000",
     "dev": "python -m http.server 3000",
     "build": "echo 'Build completed - static files ready'",
-    "deploy": "echo 'Deploy to Vercel via Git push'",
+    "deploy": "echo 'Deploy to Netlify via Git push'",
     "test": "echo 'Testing landing page functionality'"
   },
   "keywords": [
@@ -15,7 +15,8 @@
     "english",
     "school",
     "recruitment",
-    "landing-page"
+    "landing-page",
+    "netlify"
   ],
   "author": "Phoenix English School",
   "license": "MIT",

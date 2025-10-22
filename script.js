@@ -21,17 +21,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 function mostrarEtapa(id) {
   document.querySelectorAll('.etapa').forEach(el => el.classList.remove('ativa'));
   const etapa = document.getElementById(id);
-  if (etapa) {
-    etapa.classList.add('ativa');
-    
-    // Scroll suave para a etapa se necessário (apenas para loading e confirmação)
-    if (id === 'loading' || id === 'confirmacao') {
-      etapa.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-      });
-    }
-  }
+  if (etapa) etapa.classList.add('ativa');
 }
 
 // Máscara para telefone (formato brasileiro)
@@ -162,8 +152,17 @@ if (form) {
       return;
     }
     
-    // Mostrar loading
+    // Mostrar loading e manter posição
     mostrarEtapa('loading');
+    
+    // Scroll suave para o topo do formulário
+    const formularioSection = document.getElementById('formulario-section');
+    if (formularioSection) {
+      formularioSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
     
     // Simular envio (substituir por integração real)
     setTimeout(() => {
@@ -211,6 +210,15 @@ async function enviarParaGoogleSheets() {
     if (response.ok && result.success) {
       // Sucesso
       mostrarEtapa('confirmacao');
+      
+      // Scroll para ver a confirmação
+      const confirmacaoSection = document.getElementById('confirmacao');
+      if (confirmacaoSection) {
+        confirmacaoSection.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
       
       // Limpar formulário
       document.getElementById('recruitment-form').reset();
