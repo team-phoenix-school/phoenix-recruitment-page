@@ -228,8 +228,8 @@ export default async function handler(req, res) {
           'Content-Type': 'application/octet-stream',
           'Dropbox-API-Arg': JSON.stringify({
             path: caminhoArquivo,
-            mode: 'add',
-            autorename: true
+            mode: 'overwrite', // Sobrescrever se já existir
+            autorename: false
           })
         },
         body: buffer
@@ -248,7 +248,7 @@ export default async function handler(req, res) {
         throw new Error('Erro no serviço de upload');
       }
       
-      // Criar link de compartilhamento (com tratamento para link existente)
+      // Criar link de compartilhamento
       let shareResult;
       
       try {
@@ -268,41 +268,43 @@ export default async function handler(req, res) {
         
         const shareResponseText = await shareResponse.text();
         
-        if (shareResponse.status === 409) {
-          // Link já existe, buscar o link existente
-          const listResponse = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              path: uploadResult.path_display,
-              direct_only: true
-            })
-          });
-          
-          const listResponseText = await listResponse.text();
-          if (listResponse.ok) {
-            const listResult = JSON.parse(listResponseText);
-            if (listResult.links && listResult.links.length > 0) {
-              shareResult = { url: listResult.links[0].url };
+        if (!shareResponse.ok) {
+          // Se o erro for "link já existe", tentar buscar o link existente
+          if (shareResponseText.includes('shared_link_already_exists')) {
+            const listResponse = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                path: uploadResult.path_display,
+                direct_only: true
+              })
+            });
+            
+            const listResponseText = await listResponse.text();
+            if (listResponse.ok) {
+              const listResult = JSON.parse(listResponseText);
+              if (listResult.links && listResult.links.length > 0) {
+                shareResult = { url: listResult.links[0].url };
+              } else {
+                throw new Error('Não foi possível obter link do arquivo');
+              }
             } else {
-              throw new Error('Não foi possível obter link do arquivo');
+              throw new Error('Erro ao buscar link existente');
             }
           } else {
-            throw new Error('Erro ao buscar link existente');
+            throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
           }
-        } else if (!shareResponse.ok) {
-          throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
         } else {
           shareResult = JSON.parse(shareResponseText);
         }
-      } catch (parseError) {
-        throw new Error('Erro ao processar link de compartilhamento');
+      } catch (shareError) {
+        throw new Error('Erro ao criar/buscar link de compartilhamento');
       }
       
-      if (shareResult && shareResult.url) {
+      if (shareResult.url) {
         // Converter para link de download direto
         fileUrl = shareResult.url.replace('?dl=0', '?dl=1');
       } else {

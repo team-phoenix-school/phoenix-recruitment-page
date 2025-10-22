@@ -8,7 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="custom.css" />
   <script>
     tailwind.config = {
       theme: {
@@ -283,9 +282,8 @@
 
             <!-- Loading -->
             <div id="loading" class="etapa">
-              <div class="loading-spinner"></div>
-              <p class="text-lg font-semibold">Enviando sua candidatura...</p>
-              <p class="text-sm text-gray-400 mt-2">Por favor, aguarde alguns instantes</p>
+              <div class="loading-animation" role="status"></div>
+              <p>Enviando sua candidatura...</p>
             </div>
 
             <!-- Confirmação -->
