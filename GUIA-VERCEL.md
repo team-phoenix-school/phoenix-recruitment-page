@@ -89,10 +89,9 @@ GOOGLE_SERVICE_ACCOUNT_KEY={"type":"service_account","project_id":"..."}
 ```
 ⚠️ **Cole todo o conteúdo do arquivo JSON em uma linha**
 
-**Cloudinary:**
+**Dropbox:**
 ```
-CLOUDINARY_CLOUD_NAME=seu-cloud-name
-CLOUDINARY_UPLOAD_PRESET=phoenix_curriculos
+DROPBOX_ACCESS_TOKEN=sl.xxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 #### Variáveis Opcionais:
@@ -148,7 +147,7 @@ const response = await fetch('/api/submit', {
 
 ### 5.3 Verificar Resultados
 1. **Google Sheets**: Verifique se os dados foram salvos
-2. **Cloudinary**: Acesse Media Library para ver o arquivo
+2. **Dropbox**: Acesse sua conta para ver o arquivo na pasta `/curriculos`
 3. **Link do Currículo**: Clique no link na planilha para testar o download
 
 ---

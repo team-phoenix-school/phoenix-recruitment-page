@@ -149,16 +149,12 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-    const drive = google.drive({ version: 'v3', auth });
     const sheetId = process.env.SHEET_ID;
-    const driveFolderId = process.env.DRIVE_FOLDER_ID;
-    const sharedDriveId = process.env.SHARED_DRIVE_ID; // Nova variável para shared drive
     
-    // Debug das variáveis de ambiente
+    // Mostrar variáveis de ambiente (sem mostrar valores sensíveis)
     console.log('Variáveis de ambiente:', {
-      SHEET_ID: sheetId ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
-      CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
-      CLOUDINARY_UPLOAD_PRESET: process.env.CLOUDINARY_UPLOAD_PRESET ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
+      SHEET_ID: process.env.SHEET_ID ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
+      DROPBOX_ACCESS_TOKEN: process.env.DROPBOX_ACCESS_TOKEN ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
     });
     
     // Debug do Service Account
