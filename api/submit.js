@@ -6,8 +6,28 @@ function sanitizeInput(input) {
   if (typeof input !== 'string') return input;
   return input
     .trim()
-    .replace(/[<>"']/g, '') // Remove caracteres perigosos
-    .substring(0, 1000); // Limita tamanho
+    .replace(/[<>"'&]/g, '') // Remove caracteres perigosos
+    .replace(/javascript:/gi, '') // Remove javascript: URLs
+    .replace(/data:/gi, '') // Remove data: URLs (exceto para arquivos)
+    .substring(0, 500); // Limita tamanho
+}
+
+// Função para validar extensão de arquivo
+function isValidFileExtension(filename) {
+  const allowedExtensions = ['pdf', 'doc', 'docx'];
+  const extension = filename.split('.').pop().toLowerCase();
+  return allowedExtensions.includes(extension);
+}
+
+// Função para detectar possíveis malwares em nomes de arquivo
+function isSecureFilename(filename) {
+  // Rejeitar nomes suspeitos
+  const suspiciousPatterns = [
+    /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.scr$/i, /\.vbs$/i, /\.js$/i,
+    /\.jar$/i, /\.com$/i, /\.pif$/i, /\.msi$/i, /\.dll$/i
+  ];
+  
+  return !suspiciousPatterns.some(pattern => pattern.test(filename));
 }
 
 // Função para validar tamanho do payload (aumentado para suportar arquivos)
@@ -87,23 +107,30 @@ export default async function handler(req, res) {
   idade = sanitizeInput(idade);
   curriculoNome = sanitizeInput(curriculoNome || '');
 
-  // Validar campos obrigatórios
-  if (!nome || !email || !telefone || !idade || !curriculo) {
+  // Validação básica dos dados obrigatórios
+  if (!nome || !email || !telefone || !idade || !curriculo || !curriculoNome) {
     return res.status(400).json({ 
-      error: 'Campos obrigatórios faltando',
+      error: 'Dados obrigatórios não fornecidos',
       details: 'Nome, email, telefone, idade e currículo são obrigatórios'
     });
   }
-  
-  // Validar formato do arquivo
-  if (!curriculoNome || !curriculoNome.match(/\.(pdf|doc|docx)$/i)) {
-    return res.status(400).json({ 
-      error: 'Arquivo inválido',
-      details: 'O currículo deve ser um arquivo PDF, DOC ou DOCX'
+
+  // Validações de segurança
+  if (!isValidFileExtension(curriculoNome)) {
+    return res.status(400).json({
+      error: 'Tipo de arquivo não permitido',
+      details: 'Apenas arquivos PDF, DOC e DOCX são aceitos'
     });
   }
-  
-  // Validar comprimento mínimo
+
+  if (!isSecureFilename(curriculoNome)) {
+    return res.status(400).json({
+      error: 'Nome de arquivo não permitido',
+      details: 'O arquivo possui uma extensão não segura'
+    });
+  }
+
+  // Validar comprimento do nome
   if (nome.length < 2 || nome.length > 100) {
     return res.status(400).json({ 
       error: 'Nome inválido',
@@ -111,7 +138,7 @@ export default async function handler(req, res) {
     });
   }
 
-  // Validar formato de email (mais rigoroso)
+  // Validar formato de email
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email) || email.length > 254) {
     return res.status(400).json({ 
@@ -128,13 +155,13 @@ export default async function handler(req, res) {
       details: 'Por favor, forneça um telefone no formato (99) 99999-9999'
     });
   }
-  
+
   // Validar idade
   const idadeNum = parseInt(idade);
   if (isNaN(idadeNum) || idadeNum < 16 || idadeNum > 99) {
     return res.status(400).json({ 
       error: 'Idade inválida',
-      details: 'A idade deve estar entre 16 e 99 anos'
+      details: 'Por favor, forneça uma idade entre 16 e 99 anos'
     });
   }
 
@@ -151,15 +178,8 @@ export default async function handler(req, res) {
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetId = process.env.SHEET_ID;
     
-    // Mostrar variáveis de ambiente (sem mostrar valores sensíveis)
-    console.log('Variáveis de ambiente:', {
-      SHEET_ID: process.env.SHEET_ID ? 'CONFIGURADO' : 'NÃO CONFIGURADO',
-      DROPBOX_ACCESS_TOKEN: process.env.DROPBOX_ACCESS_TOKEN ? 'CONFIGURADO' : 'NÃO CONFIGURADO'
-    });
-    
-    // Debug do Service Account
+    // Verificar configuração sem expor dados sensíveis
     const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
-    console.log('Service Account email:', credentials.client_email);
 
     // Verificar se as variáveis de ambiente estão configuradas
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.SHEET_ID) {
@@ -170,20 +190,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Configuração: Upload via Dropbox
-    console.log('Configuração: Upload de arquivos via Dropbox');
-    
+    // Upload via Dropbox
     let fileUrl = '';
     try {
-      console.log('Iniciando upload do currículo para Dropbox...');
-      
       // Verificar se Dropbox está configurado
       if (!process.env.DROPBOX_ACCESS_TOKEN) {
-        throw new Error('DROPBOX_ACCESS_TOKEN não configurado');
+        throw new Error('Serviço de upload não configurado');
       }
-      
-      console.log('DROPBOX_ACCESS_TOKEN configurado:', process.env.DROPBOX_ACCESS_TOKEN ? 'SIM' : 'NÃO');
-      console.log('Token length:', process.env.DROPBOX_ACCESS_TOKEN?.length || 0);
       
       // Criar nome do arquivo usando o nome da pessoa
       const timestamp = Date.now();
@@ -192,15 +205,20 @@ export default async function handler(req, res) {
       const nomeArquivo = `Curriculo_${nomeSeguro}.${extensao}`;
       const caminhoArquivo = `/curriculos/${nomeArquivo}`;
       
-      console.log('Fazendo upload:', nomeArquivo);
-      console.log('Arquivo original:', curriculoNome);
-      console.log('Caminho no Dropbox:', caminhoArquivo);
-      
-      // Converter base64 para buffer
+      // Validar e converter arquivo
       const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
+      
+      // Validar se é base64 válido
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
+        throw new Error('Formato de arquivo inválido');
+      }
+      
       const buffer = Buffer.from(base64Data, 'base64');
       
-      console.log('Tamanho do buffer:', buffer.length);
+      // Validar tamanho do arquivo (máximo 5MB)
+      if (buffer.length > 5 * 1024 * 1024) {
+        throw new Error('Arquivo muito grande');
+      }
       
       // Upload para Dropbox
       const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
@@ -219,10 +237,6 @@ export default async function handler(req, res) {
       
       const responseText = await uploadResponse.text();
       
-      console.log('Resposta do Dropbox:');
-      console.log('Status:', uploadResponse.status);
-      console.log('Response text:', responseText);
-      
       if (!uploadResponse.ok) {
         throw new Error(`Dropbox upload failed: ${uploadResponse.status} - ${responseText}`);
       }
@@ -230,13 +244,11 @@ export default async function handler(req, res) {
       let uploadResult;
       try {
         uploadResult = JSON.parse(responseText);
-        console.log('Upload result:', JSON.stringify(uploadResult, null, 2));
       } catch (parseError) {
-        throw new Error(`Invalid JSON response from Dropbox: ${responseText}`);
+        throw new Error('Erro no serviço de upload');
       }
       
       // Criar link de compartilhamento
-      console.log('Criando link de compartilhamento...');
       
       const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
         method: 'POST',
@@ -254,10 +266,6 @@ export default async function handler(req, res) {
       
       const shareResponseText = await shareResponse.text();
       
-      console.log('Resposta do compartilhamento:');
-      console.log('Status:', shareResponse.status);
-      console.log('Share response text:', shareResponseText);
-      
       if (!shareResponse.ok) {
         throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
       }
@@ -265,30 +273,25 @@ export default async function handler(req, res) {
       let shareResult;
       try {
         shareResult = JSON.parse(shareResponseText);
-        console.log('Share result:', JSON.stringify(shareResult, null, 2));
       } catch (parseError) {
-        throw new Error(`Invalid JSON response from Dropbox share: ${shareResponseText}`);
+        throw new Error('Erro ao criar link de compartilhamento');
       }
       
       if (shareResult.url) {
         // Converter para link de download direto
         fileUrl = shareResult.url.replace('?dl=0', '?dl=1');
-        console.log('Link de compartilhamento criado:', shareResult.url);
-        console.log('Link de download direto:', fileUrl);
       } else {
-        throw new Error(`No URL in share response: ${JSON.stringify(shareResult)}`);
+        throw new Error('Erro ao gerar link do arquivo');
       }
       
     } catch (uploadError) {
-      console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
-      console.error('Stack trace:', uploadError.stack);
+      // Log apenas para debug interno (sem expor detalhes)
+      console.error('Upload error:', uploadError.message);
       
       // Fallback: salvar informações do arquivo sem o upload
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9]/g, '_');
-      fileUrl = `ARQUIVO_NAO_SALVO: ${curriculoNome} (${nomeSeguro}_${timestamp}) - Erro: ${uploadError.message}`;
-      
-      console.log('Usando fallback para arquivo:', fileUrl);
+      fileUrl = `ARQUIVO_PENDENTE: ${nomeSeguro}_${timestamp}`;
     }
 
     // Preparar data/hora no formato brasileiro
