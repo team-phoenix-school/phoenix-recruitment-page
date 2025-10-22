@@ -3,31 +3,33 @@
 ## 📋 Pré-requisitos
 
 - Conta no [Vercel](https://vercel.com) (gratuita)
-- Conta no [Cloudinary](https://cloudinary.com) (gratuita)
+- Conta no [Dropbox](https://dropbox.com) (gratuita - 2GB)
 - Conta no Google Cloud com Service Account configurada
 - Repositório Git (GitHub, GitLab ou Bitbucket)
 
 ---
 
-## 🎯 Passo 1: Configurar Cloudinary
+## 🎯 Passo 1: Configurar Dropbox
 
 ### 1.1 Criar Conta
-1. Acesse [cloudinary.com](https://cloudinary.com)
-2. Crie uma conta gratuita
-3. Acesse o Dashboard
+1. Acesse [dropbox.com](https://dropbox.com)
+2. Crie uma conta gratuita (2GB grátis)
+3. Faça login
 
-### 1.2 Criar Upload Preset
-1. Vá para **Settings** → **Upload**
-2. Clique em **Add upload preset**
+### 1.2 Criar App no Dropbox
+1. Acesse [Dropbox App Console](https://www.dropbox.com/developers/apps)
+2. Clique em **"Create app"**
 3. Configure:
-   - **Preset name**: `phoenix_curriculos`
-   - **Signing Mode**: `Unsigned` ⚠️ **IMPORTANTE**
-   - **Folder**: `curriculos`
-4. Clique em **Save**
+   - **API**: Dropbox API
+   - **Type**: App folder (recomendado) ou Full Dropbox
+   - **Name**: `phoenix-recruitment` (ou qualquer nome)
+4. Clique em **"Create app"**
 
-### 1.3 Anotar Credenciais
-No Dashboard, anote:
-- **Cloud Name** (ex: `dxxxxx`)
+### 1.3 Gerar Access Token
+1. Na página do app criado
+2. Vá para **Settings** → **OAuth 2**
+3. Em **"Generated access token"**, clique em **"Generate"**
+4. **Copie o token** - você vai precisar dele
 
 ---
 

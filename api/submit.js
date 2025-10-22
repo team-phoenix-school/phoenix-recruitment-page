@@ -174,17 +174,16 @@ export default async function handler(req, res) {
       });
     }
 
-    // Configuração: Upload via Cloudinary
-    console.log('Configuração: Upload de arquivos via Cloudinary');
+    // Configuração: Upload via Dropbox
+    console.log('Configuração: Upload de arquivos via Dropbox');
     
-    // Upload do arquivo usando Cloudinary (gratuito)
     let fileUrl = '';
     try {
-      console.log('Iniciando upload do currículo...');
+      console.log('Iniciando upload do currículo para Dropbox...');
       
-      // Verificar se Cloudinary está configurado
-      if (!process.env.CLOUDINARY_CLOUD_NAME) {
-        throw new Error('CLOUDINARY_CLOUD_NAME não configurado');
+      // Verificar se Dropbox está configurado
+      if (!process.env.DROPBOX_ACCESS_TOKEN) {
+        throw new Error('DROPBOX_ACCESS_TOKEN não configurado');
       }
       
       // Criar nome do arquivo usando o nome da pessoa
@@ -192,77 +191,74 @@ export default async function handler(req, res) {
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
       const extensao = curriculoNome.split('.').pop().toLowerCase();
       const nomeArquivo = `Curriculo_${nomeSeguro}.${extensao}`;
+      const caminhoArquivo = `/curriculos/${nomeArquivo}`;
       
       console.log('Fazendo upload:', nomeArquivo);
       console.log('Arquivo original:', curriculoNome);
+      console.log('Caminho no Dropbox:', caminhoArquivo);
       
-      // Upload para Cloudinary como raw (para documentos)
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`;
+      // Converter base64 para buffer
+      const base64Data = curriculo.includes(',') ? curriculo.split(',')[1] : curriculo;
+      const buffer = Buffer.from(base64Data, 'base64');
       
-      console.log('Tamanho do curriculo:', curriculo.length);
-      console.log('Extensão:', extensao);
+      console.log('Tamanho do buffer:', buffer.length);
       
-      // Debug das variáveis
-      console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
-      console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
-      console.log('URL do Cloudinary:', cloudinaryUrl);
-      
-      // Usar URLSearchParams - mais simples e confiável para o Cloudinary
-      const formData = new URLSearchParams();
-      formData.append('file', curriculo);
-      formData.append('upload_preset', 'ml_default');
-      formData.append('public_id', `curriculos/${nomeArquivo}`); // COM extensão
-      formData.append('resource_type', 'raw');
-      
-      console.log('Enviando dados para Cloudinary...');
-      console.log('Public ID:', `curriculos/${nomeArquivo}`);
-      console.log('Arquivo:', nomeArquivo);
-      console.log('Tamanho do curriculo:', curriculo.length);
-      console.log('Primeiros 50 chars do curriculo:', curriculo.substring(0, 50));
-      console.log('É data URI?', curriculo.startsWith('data:'));
-      
-      const uploadResponse = await fetch(cloudinaryUrl, {
+      // Upload para Dropbox
+      const uploadResponse = await fetch('https://content.dropboxapi.com/2/files/upload', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+          'Content-Type': 'application/octet-stream',
+          'Dropbox-API-Arg': JSON.stringify({
+            path: caminhoArquivo,
+            mode: 'add',
+            autorename: true
+          })
         },
-        body: formData
+        body: buffer
       });
       
-      const responseText = await uploadResponse.text();
+      const uploadResult = await uploadResponse.json();
       
-      console.log('Resposta do Cloudinary:');
+      console.log('Resposta do Dropbox:');
       console.log('Status:', uploadResponse.status);
-      console.log('Response:', responseText);
+      console.log('Upload result:', JSON.stringify(uploadResult, null, 2));
       
       if (!uploadResponse.ok) {
-        throw new Error(`Cloudinary upload failed: ${uploadResponse.status} - ${responseText}`);
+        throw new Error(`Dropbox upload failed: ${uploadResponse.status} - ${JSON.stringify(uploadResult)}`);
       }
       
-      const uploadResult = JSON.parse(responseText);
+      // Criar link de compartilhamento
+      console.log('Criando link de compartilhamento...');
       
-      console.log('Upload result completo:', JSON.stringify(uploadResult, null, 2));
+      const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          path: uploadResult.path_display,
+          settings: {
+            requested_visibility: 'public'
+          }
+        })
+      });
       
-      // Usar URL direta do Cloudinary para raw files
-      let baseUrl = uploadResult.secure_url;
+      const shareResult = await shareResponse.json();
       
-      // Se a URL não for raw, corrigir manualmente
-      if (baseUrl.includes('/image/upload/')) {
-        baseUrl = baseUrl.replace('/image/upload/', '/raw/upload/');
-      }
+      console.log('Resposta do compartilhamento:');
+      console.log('Status:', shareResponse.status);
+      console.log('Share result:', JSON.stringify(shareResult, null, 2));
       
-      // Usar URL direta sem fl_attachment (que estava quebrando)
-      // Adicionar extensão na URL se não tiver
-      if (!baseUrl.endsWith('.pdf') && !baseUrl.endsWith('.doc') && !baseUrl.endsWith('.docx')) {
-        fileUrl = baseUrl + '.' + extensao;
+      if (shareResponse.ok && shareResult.url) {
+        // Converter para link de download direto
+        fileUrl = shareResult.url.replace('?dl=0', '?dl=1');
+        console.log('Link de compartilhamento criado:', shareResult.url);
+        console.log('Link de download direto:', fileUrl);
       } else {
-        fileUrl = baseUrl;
+        throw new Error(`Dropbox share failed: ${shareResponse.status} - ${JSON.stringify(shareResult)}`);
       }
-      
-      console.log('Upload realizado com sucesso:', fileUrl);
-      console.log('URL original:', uploadResult.secure_url);
-      console.log('URL base corrigida:', baseUrl);
-      console.log('Nome do arquivo:', nomeArquivo);
       
     } catch (uploadError) {
       console.error('Erro detalhado ao fazer upload do currículo:', uploadError);
