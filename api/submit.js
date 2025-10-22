@@ -186,6 +186,9 @@ export default async function handler(req, res) {
         throw new Error('DROPBOX_ACCESS_TOKEN não configurado');
       }
       
+      console.log('DROPBOX_ACCESS_TOKEN configurado:', process.env.DROPBOX_ACCESS_TOKEN ? 'SIM' : 'NÃO');
+      console.log('Token length:', process.env.DROPBOX_ACCESS_TOKEN?.length || 0);
+      
       // Criar nome do arquivo usando o nome da pessoa
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
@@ -218,14 +221,22 @@ export default async function handler(req, res) {
         body: buffer
       });
       
-      const uploadResult = await uploadResponse.json();
+      const responseText = await uploadResponse.text();
       
       console.log('Resposta do Dropbox:');
       console.log('Status:', uploadResponse.status);
-      console.log('Upload result:', JSON.stringify(uploadResult, null, 2));
+      console.log('Response text:', responseText);
       
       if (!uploadResponse.ok) {
-        throw new Error(`Dropbox upload failed: ${uploadResponse.status} - ${JSON.stringify(uploadResult)}`);
+        throw new Error(`Dropbox upload failed: ${uploadResponse.status} - ${responseText}`);
+      }
+      
+      let uploadResult;
+      try {
+        uploadResult = JSON.parse(responseText);
+        console.log('Upload result:', JSON.stringify(uploadResult, null, 2));
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response from Dropbox: ${responseText}`);
       }
       
       // Criar link de compartilhamento
@@ -245,19 +256,31 @@ export default async function handler(req, res) {
         })
       });
       
-      const shareResult = await shareResponse.json();
+      const shareResponseText = await shareResponse.text();
       
       console.log('Resposta do compartilhamento:');
       console.log('Status:', shareResponse.status);
-      console.log('Share result:', JSON.stringify(shareResult, null, 2));
+      console.log('Share response text:', shareResponseText);
       
-      if (shareResponse.ok && shareResult.url) {
+      if (!shareResponse.ok) {
+        throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
+      }
+      
+      let shareResult;
+      try {
+        shareResult = JSON.parse(shareResponseText);
+        console.log('Share result:', JSON.stringify(shareResult, null, 2));
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response from Dropbox share: ${shareResponseText}`);
+      }
+      
+      if (shareResult.url) {
         // Converter para link de download direto
         fileUrl = shareResult.url.replace('?dl=0', '?dl=1');
         console.log('Link de compartilhamento criado:', shareResult.url);
         console.log('Link de download direto:', fileUrl);
       } else {
-        throw new Error(`Dropbox share failed: ${shareResponse.status} - ${JSON.stringify(shareResult)}`);
+        throw new Error(`No URL in share response: ${JSON.stringify(shareResult)}`);
       }
       
     } catch (uploadError) {
