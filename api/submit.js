@@ -198,11 +198,11 @@ export default async function handler(req, res) {
         throw new Error('Serviço de upload não configurado');
       }
       
-      // Criar nome do arquivo usando o nome da pessoa
+      // Criar nome do arquivo usando o nome da pessoa + timestamp para evitar duplicatas
       const timestamp = Date.now();
       const nomeSeguro = nome.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
       const extensao = curriculoNome.split('.').pop().toLowerCase();
-      const nomeArquivo = `Curriculo_${nomeSeguro}.${extensao}`;
+      const nomeArquivo = `Curriculo_${nomeSeguro}_${timestamp}.${extensao}`;
       const caminhoArquivo = `/curriculos/${nomeArquivo}`;
       
       // Validar e converter arquivo
@@ -249,32 +249,59 @@ export default async function handler(req, res) {
       }
       
       // Criar link de compartilhamento
-      
-      const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          path: uploadResult.path_display,
-          settings: {
-            requested_visibility: 'public'
-          }
-        })
-      });
-      
-      const shareResponseText = await shareResponse.text();
-      
-      if (!shareResponse.ok) {
-        throw new Error(`Dropbox share failed: ${shareResponse.status} - ${shareResponseText}`);
-      }
-      
       let shareResult;
+      
       try {
-        shareResult = JSON.parse(shareResponseText);
+        const shareResponse = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            path: uploadResult.path_display,
+            settings: {
+              requested_visibility: 'public'
+            }
+          })
+        });
+        
+        const shareResponseText = await shareResponse.text();
+        
+        if (shareResponse.status === 409) {
+          // Link já existe, tentar obter o link existente
+          const listResponse = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.DROPBOX_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              path: uploadResult.path_display
+            })
+          });
+          
+          const listResponseText = await listResponse.text();
+          if (listResponse.ok) {
+            const listResult = JSON.parse(listResponseText);
+            if (listResult.links && listResult.links.length > 0) {
+              shareResult = { url: listResult.links[0].url };
+            } else {
+              throw new Error('Não foi possível obter link do arquivo');
+            }
+          } else {
+            throw new Error('Erro ao obter link existente');
+          }
+        } else if (!shareResponse.ok) {
+          throw new Error(`Erro no serviço de compartilhamento: ${shareResponse.status}`);
+        } else {
+          shareResult = JSON.parse(shareResponseText);
+        }
       } catch (parseError) {
-        throw new Error('Erro ao criar link de compartilhamento');
+        if (parseError.message.includes('serviço')) {
+          throw parseError;
+        }
+        throw new Error('Erro ao processar link de compartilhamento');
       }
       
       if (shareResult.url) {

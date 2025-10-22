@@ -21,7 +21,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 function mostrarEtapa(id) {
   document.querySelectorAll('.etapa').forEach(el => el.classList.remove('ativa'));
   const etapa = document.getElementById(id);
-  if (etapa) etapa.classList.add('ativa');
+  if (etapa) {
+    etapa.classList.add('ativa');
+    
+    // Scroll suave para a etapa se necessário (apenas para loading e confirmação)
+    if (id === 'loading' || id === 'confirmacao') {
+      etapa.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  }
 }
 
 // Máscara para telefone (formato brasileiro)
