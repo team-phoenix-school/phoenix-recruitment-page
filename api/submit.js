@@ -211,11 +211,11 @@ export default async function handler(req, res) {
       const formData = new URLSearchParams();
       formData.append('file', curriculo);
       formData.append('upload_preset', 'ml_default');
-      formData.append('public_id', `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}`);
+      formData.append('public_id', `curriculos/${nomeArquivo}`); // COM extensão
       formData.append('resource_type', 'raw');
       
       console.log('Enviando dados para Cloudinary...');
-      console.log('Public ID:', `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}`);
+      console.log('Public ID:', `curriculos/${nomeArquivo}`);
       console.log('Arquivo:', nomeArquivo);
       console.log('Tamanho do curriculo:', curriculo.length);
       console.log('Primeiros 50 chars do curriculo:', curriculo.substring(0, 50));
@@ -251,8 +251,13 @@ export default async function handler(req, res) {
         baseUrl = baseUrl.replace('/image/upload/', '/raw/upload/');
       }
       
-      // Adicionar parâmetro fl_attachment para forçar download com nome e extensão corretos
-      fileUrl = baseUrl.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(nomeArquivo)}/`);
+      // Usar URL direta sem fl_attachment (que estava quebrando)
+      // Adicionar extensão na URL se não tiver
+      if (!baseUrl.endsWith('.pdf') && !baseUrl.endsWith('.doc') && !baseUrl.endsWith('.docx')) {
+        fileUrl = baseUrl + '.' + extensao;
+      } else {
+        fileUrl = baseUrl;
+      }
       
       console.log('Upload realizado com sucesso:', fileUrl);
       console.log('URL original:', uploadResult.secure_url);
