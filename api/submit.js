@@ -207,46 +207,41 @@ export default async function handler(req, res) {
       console.log('CLOUDINARY_UPLOAD_PRESET:', process.env.CLOUDINARY_UPLOAD_PRESET);
       console.log('URL do Cloudinary:', cloudinaryUrl);
       
-      // Criar boundary para multipart/form-data manualmente
-      const boundary = '----formdata-' + Math.random().toString(36);
-      const CRLF = '\r\n';
+      // Usar URLSearchParams - mais simples e confiável para o Cloudinary
+      const formData = new URLSearchParams();
+      formData.append('file', curriculo);
+      formData.append('upload_preset', 'ml_default');
+      formData.append('public_id', `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}`);
+      formData.append('resource_type', 'raw');
       
-      // Construir multipart body manualmente
-      let body = '';
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="file"; filename="${nomeArquivo}"${CRLF}`;
-      body += `Content-Type: application/octet-stream${CRLF}${CRLF}`;
-      body += curriculo + CRLF;
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="upload_preset"${CRLF}${CRLF}`;
-      body += 'ml_default' + CRLF;
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="public_id"${CRLF}${CRLF}`;
-      body += `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}` + CRLF;
-      body += `--${boundary}${CRLF}`;
-      body += `Content-Disposition: form-data; name="resource_type"${CRLF}${CRLF}`;
-      body += 'raw' + CRLF;
-      body += `--${boundary}--${CRLF}`;
-      
-      console.log('Enviando multipart/form-data para Cloudinary...');
-      console.log('Boundary:', boundary);
-      console.log('Body size:', body.length);
+      console.log('Enviando dados para Cloudinary...');
+      console.log('Public ID:', `curriculos/${nomeArquivo.replace(/\.[^/.]+$/, '')}`);
+      console.log('Arquivo:', nomeArquivo);
+      console.log('Tamanho do curriculo:', curriculo.length);
+      console.log('Primeiros 50 chars do curriculo:', curriculo.substring(0, 50));
+      console.log('É data URI?', curriculo.startsWith('data:'));
       
       const uploadResponse = await fetch(cloudinaryUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': `multipart/form-data; boundary=${boundary}`
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: body
+        body: formData
       });
       
       const responseText = await uploadResponse.text();
+      
+      console.log('Resposta do Cloudinary:');
+      console.log('Status:', uploadResponse.status);
+      console.log('Response:', responseText);
       
       if (!uploadResponse.ok) {
         throw new Error(`Cloudinary upload failed: ${uploadResponse.status} - ${responseText}`);
       }
       
       const uploadResult = JSON.parse(responseText);
+      
+      console.log('Upload result completo:', JSON.stringify(uploadResult, null, 2));
       
       // Usar URL direta do Cloudinary para raw files
       let baseUrl = uploadResult.secure_url;
