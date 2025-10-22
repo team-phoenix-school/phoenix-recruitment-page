@@ -249,15 +249,19 @@ export default async function handler(req, res) {
       const uploadResult = JSON.parse(responseText);
       
       // Usar URL direta do Cloudinary para raw files
-      fileUrl = uploadResult.secure_url;
+      let baseUrl = uploadResult.secure_url;
       
       // Se a URL não for raw, corrigir manualmente
-      if (fileUrl.includes('/image/upload/')) {
-        fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+      if (baseUrl.includes('/image/upload/')) {
+        baseUrl = baseUrl.replace('/image/upload/', '/raw/upload/');
       }
+      
+      // Adicionar parâmetro fl_attachment para forçar download com nome e extensão corretos
+      fileUrl = baseUrl.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(nomeArquivo)}/`);
       
       console.log('Upload realizado com sucesso:', fileUrl);
       console.log('URL original:', uploadResult.secure_url);
+      console.log('URL base corrigida:', baseUrl);
       console.log('Nome do arquivo:', nomeArquivo);
       
     } catch (uploadError) {
