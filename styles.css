@@ -7,24 +7,47 @@
 /* Fontes */
 @font-face {
   font-family: 'Axiforma';
-  src: url('./fonts/Axiforma-Regular.woff2') format('woff2');
+  src: url('src/fonts/Axiforma-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
-  font-display: optional;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Axiforma';
-  src: url('./fonts/Axiforma-Bold.woff2') format('woff2');
+  src: url('src/fonts/Axiforma-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
-  font-display: optional;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('src/fonts/Axiforma-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Acumin Variable Concept';
-  src: url('./fonts/Acumin-Pro.woff2') format('woff2');
+  src: url('src/fonts/AcuminVariableConcept.woff2') format('woff2');
   font-weight: 100 900;
   font-style: normal;
-  font-display: optional;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Andis';
+  src: url('src/fonts/Andis-Regular.otf') format('opentype'),
+       url('src/fonts/Andis.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Felix Titling';
+  src: url('src/fonts/Felix-Titling.otf') format('opentype'),
+       url('src/fonts/Felix-Titling.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Utilitários de fonte */
