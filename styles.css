@@ -76,7 +76,7 @@ strong, b {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("https://raw.githubusercontent.com/phoenix-droid-art/phoenix-landing-page/refs/heads/main/src/assets/Background-2.webp");
+  background-image: url("./src/assets/Background-2.webp");
   background-size: cover;
   background-position: center;
   filter: grayscale(80%) brightness(0.5);
