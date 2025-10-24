@@ -7,21 +7,21 @@
 /* Fontes */
 @font-face {
   font-family: 'Axiforma';
-  src: url('./src/fonts/Axiforma-Regular.woff2') format('woff2');
+  src: url('https://raw.githubusercontent.com/team-phoenix-school/phoenix-recruitment-page/refs/heads/main/src/fonts/Axiforma-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: optional;
 }
 @font-face {
   font-family: 'Axiforma';
-  src: url('./src/fonts/Axiforma-Bold.woff2') format('woff2');
+  src: url('https://raw.githubusercontent.com/team-phoenix-school/phoenix-recruitment-page/refs/heads/main/src/fonts/Axiforma-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: optional;
 }
 @font-face {
   font-family: 'Acumin Variable Concept';
-  src: url('./src/fonts/AcuminVariableConcept.woff2') format('woff2');
+  src: url('https://raw.githubusercontent.com/team-phoenix-school/phoenix-recruitment-page/refs/heads/main/src/fonts/Acumin-Pro.woff2') format('woff2');
   font-weight: 100 900;
   font-style: normal;
   font-display: optional;
